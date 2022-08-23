@@ -37,6 +37,7 @@ const columns: Array<keyof ExportableMember> = [
   'isExemptFromCheckIn',
   'isOptedOutOfMap',
   'numberOfPeopleToRelocate',
+  'otherSupport',
   'comment',
   'lastCheckedIn',
 ];
