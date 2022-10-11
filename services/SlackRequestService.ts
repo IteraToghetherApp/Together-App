@@ -153,7 +153,7 @@ export class SlackRequestService implements ISlackRequestService {
 
     await this.memberService.repeatCheckIn(member);
 
-    return this.modalService.renderMainMenu({ member, ...modalServiceParams });
+    return this.modalService.renderSuccessConfirm({ member, ...modalServiceParams });
   }
 
   public async handleRenderSuccess(params: ActionHandlerParams<BlockAction>): Promise<void> {

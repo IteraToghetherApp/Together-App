@@ -55,4 +55,6 @@ export interface IModalService {
   renderSuccess(params: MemberableModalServiceMethodParams): Promise<void>;
 
   renderError(params: RenderErrorParams): Promise<void>;
+
+  renderSuccessConfirm(params: MemberableModalServiceMethodParams): Promise<void>;
 }
