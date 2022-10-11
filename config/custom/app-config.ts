@@ -1,5 +1,5 @@
 //TYPE_APP = 1 (24 hours), 2 (Week), 3(Month)
-export const TYPE_APP = 3;
+export const TYPE_APP = 1;
 
 export const option_24_hour = "Past 24 Hours"
 export const option_48_hour = "Past 48 Hours"
