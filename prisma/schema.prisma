@@ -14,7 +14,7 @@ model MemberRecord {
   name                  String
   isAdmin               Boolean         @default(false)
   isMobilized           Boolean         @default(false)
-  isExemptFromCheckIn   Boolean         @default(false)
+  isExemptFromCheckIn   Boolean         @default(true)
   isOptedOutOfMap       Boolean         @default(false)
   checkInToken          String?         @Db.Uuid
   isRestricted          Boolean         @default(false)

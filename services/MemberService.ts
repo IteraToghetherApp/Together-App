@@ -200,7 +200,7 @@ export class MemberService implements IMemberService {
           isUltraRestricted: member.isUltraRestricted,
           isAdmin: false,
           isMobilized: false,
-          isExemptFromCheckIn: false,
+          isExemptFromCheckIn: true,
           isOptedOutOfMap: false,
           checkInToken: null,
           checkIn: null,
