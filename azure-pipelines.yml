@@ -1,0 +1,86 @@
+# Node.js with React
+# Build a Node.js project that uses React.
+# Add steps that analyze code, save build artifacts, deploy, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/javascript
+
+variables:
+- name: NODE_ENV
+  value: production
+- name: ALLOWED_REFERRER_ID
+  value: Amc8ltms6YUFUi6gXMYgBo23fUoFjCRZLXQOfBA2
+- name: GOOGLE_GEOCODING_API_TOKEN
+  value: AIzaSyCOK4632m4JSwkI2PIP478UlnTXCTPHJGQ
+- name: GOOGLE_PLACES_API_TOKEN
+  value: AIzaSyCOK4632m4JSwkI2PIP478UlnTXCTPHJGQ
+- name: HOST
+  value: 
+- name: JOBS_API_TOKEN
+  value: 4Ob526RPByPaunT1uUNdjULXl99HRQO1I8qUUmM4
+- name: MAPBOX_MAP_TOKEN
+  value: pk.eyJ1IjoiZWR1YXJkLXBhbmFzZW5rbyIsImEiOiJjbDYyNGJxdmcwZDR1M2RwbnZ5a3VhdGIwIn0.NOfMt3-T9biS-eYCx34a4Q
+- name: NEXTAUTH_SECRET
+  value: secret
+- name: NEXTAUTH_URL
+  value: 
+- name: OKTA_CLIENT_ID
+  value: 0oa6qkep9cHb9ZOBO5d7
+- name: OKTA_CLIENT_SECRET
+  value: 0oa6qkep9cHb9ZOBO5d7
+- name: OKTA_ISSUER
+  value: https://dev-32251003.okta.com
+- name: PORT
+  value: 
+- name: SLACK_MONITORING_CHANNEL_ID
+  value: C03R5R1H49Y
+- name: SLACK_ORGANIZATION_CHANNEL_ID
+  value: C03R5QYHBCJ
+- name: SLACK_TOGETHER_APP_SIGNING_SECRET
+  value: 95bcfd424a569f9270bcca8636e72595
+- name: SLACK_TOGETHER_APP_TOKEN
+  value: xoxb-3864042042433-3841327240855-cyv0r4GRh3h6PDJ9LFx3P3la
+- name: SLACK_WORKSPACE_ID
+  value: T03RE1818CR
+- name: TOGETHER_ADMINISTRATOR_SLACK_USER_ID
+  value: U03R3QGEE2Y
+- name: TYPE_APP
+  value: 2
+
+# PORT=3000
+# NEXT_PUBLIC_HOST=https://40f4-91-213-62-66.eu.ngrok.io
+# DATABASE_URL=postgres://admin:admin@db:5432/together
+# SLACK_TOGETHER_APP_TOKEN=xoxb-3864042042433-3841327240855-cyv0r4GRh3h6PDJ9LFx3P3la
+# SLACK_TOGETHER_APP_SIGNING_SECRET=95bcfd424a569f9270bcca8636e72595
+# SLACK_MONITORING_CHANNEL_ID=C03R5R1H49Y
+# SLACK_ORGANIZATION_CHANNEL_ID=C03R5QYHBCJ
+# SLACK_WORKSPACE_ID=T03RE1818CR
+# TOGETHER_ADMINISTRATOR_SLACK_USER_ID=U03R3QGEE2Y
+# GOOGLE_GEOCODING_API_TOKEN=AIzaSyCOK4632m4JSwkI2PIP478UlnTXCTPHJGQ
+# GOOGLE_PLACES_API_TOKEN=AIzaSyCOK4632m4JSwkI2PIP478UlnTXCTPHJGQ
+# MAPBOX_MAP_TOKEN=pk.eyJ1IjoiZWR1YXJkLXBhbmFzZW5rbyIsImEiOiJjbDYyNGJxdmcwZDR1M2RwbnZ5a3VhdGIwIn0.NOfMt3-T9biS-eYCx34a4Q
+# OKTA_CLIENT_ID=0oa6qkep9cHb9ZOBO5d7
+# OKTA_CLIENT_SECRET=8DddhAQbIrnYZ7wDu242-7eraBu4HR0e3tKo0IHR
+# OKTA_ISSUER=https://dev-32251003.okta.com
+# NEXTAUTH_URL=https://40f4-91-213-62-66.eu.ngrok.io
+# NEXTAUTH_SECRET=secret
+# ALLOWED_REFERRER_ID=dasdasdgdfk
+# JOBS_API_TOKEN=sdfghjkll
+# TYPE_APP=2
+# SLACK_ALERT_APP_TOKEN=xoxb-3864042042433-4258192445298-BhQSUGqfRdS8HCuzB0K4K9DJ
+# SLACK_ALERT_APP_SIGNING_SECRET=b0c7889fdc33ea9e98dc1d1c8ee6da9b
+
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+steps:
+- task: NodeTool@0
+  inputs:
+    versionSpec: '16.13.0'
+  displayName: 'Install Node.js'
+
+- script: |
+    npm install
+    npm run build
+  displayName: 'npm install and build'
