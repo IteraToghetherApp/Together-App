@@ -1,25 +1,18 @@
 import React, {useEffect, useState} from 'react';
+import type {Nullable} from '../../types';
 import {LatLongable, Maybe, ObjectLiteral} from '../../types';
 import {useRouter} from 'next/router';
 import axios from 'axios';
-import {FormRow, Select, Input, Button, Banner} from '@macpaw/macpaw-ui';
+import {Banner, Button, FormRow, Input, Select} from '@macpaw/macpaw-ui';
 import {InputValueType} from '@macpaw/macpaw-ui/lib/types';
 import {GetServerSideProps} from 'next';
-import {memberService} from '../../services';
-import {
-    RefreshingIcon,
-    CheckIcon,
-    ErrorIcon,
-    AccountIcon,
-} from '@macpaw/macpaw-ui/lib/Icons/jsx';
+import {checkInMemberService} from '../../services';
+import {AccountIcon, CheckIcon, ErrorIcon, RefreshingIcon,} from '@macpaw/macpaw-ui/lib/Icons/jsx';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import styles from './CheckIn.module.sass';
 import {ALLOWED_REFERRER_ID, GOOGLE_PLACES_API_TOKEN, logger} from '../../config';
 import {validateMemberCheckInToken} from '../../helpers/server';
-
-import type {Nullable} from '../../types';
 import {InvalidCheckInTokenError, MemberNotFoundError} from '../../exceptions';
-import {clearLine} from "readline";
 import {supportValues} from "../../components/Filters/Filters";
 
 interface CheckInProps {
@@ -479,7 +472,7 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
             return {props: {error: 'notAuthed'}};
         }
 
-        const member = await memberService.getById(memberId);
+        const member = await checkInMemberService.getById(memberId);
 
         validateMemberCheckInToken({member, checkInToken});
 

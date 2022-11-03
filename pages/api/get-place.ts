@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { memberService, locationService } from '../../services';
+import { checkInMemberService, locationService } from '../../services';
 import { handleAPIErrors, validateHttpMethod } from '../../helpers/server';
 
 interface Payload {
@@ -14,7 +14,7 @@ export default async function GetPlace(req: NextApiRequest, res: NextApiResponse
 
     const { latitude, longitude, memberId }: Payload = req.body;
 
-    await memberService.getById(memberId); // Throws an error if the member is not found
+    await checkInMemberService.getById(memberId); // Throws an error if the member is not found
 
     const location = await locationService.getApproximatedLocationByLatLong({ latitude, longitude });
     const { country, state, city } = location;

@@ -1,17 +1,17 @@
-import { NextApiResponse } from 'next';
-import { ApplicationError } from '../../exceptions';
-import { logger } from '../../config/custom';
+import {NextApiResponse} from 'next';
+import {ApplicationError} from '../../exceptions';
+import {logger} from '../../config';
 
 export const handleAPIErrors = (error: unknown, res: NextApiResponse): void => {
-  logger
-    ? logger.error(error)
-    : console.log(error);
+    logger
+        ? logger.error(error)
+        : console.log(error);
 
-  if (error instanceof ApplicationError) {
-    res.status(error.status).json({ code: error.code, message: error.message });
+    if (error instanceof ApplicationError) {
+        res.status(error.status).json({code: error.code, message: error.message});
 
-    return;
-  }
+        return;
+    }
 
-  res.status(500).json({ code: null, message: 'Something went wrong. Please try again.' });
+    res.status(500).json({code: null, message: 'Something went wrong. Please try again.'});
 }

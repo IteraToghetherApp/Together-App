@@ -1,148 +1,178 @@
-import { RecordableEntity, RecordableEntityAttributes, SerializableTimestamps } from './RecordableEntity';
+import {RecordableEntity, RecordableEntityAttributes, SerializableTimestamps} from './RecordableEntity';
 
-import type { IDtoable, IProtectedDtoable } from './interfaces';
-import type { Nullable } from '../types';
-import type { CheckIn, CheckInDto, ProtectedCheckInDto } from './CheckIn';
+import type {IDtoable, IProtectedDtoable} from './interfaces';
+import type {Nullable} from '../types';
+import type {CheckIn, CheckInDto, ProtectedCheckInDto} from './CheckIn';
+import {Alert, AlertDto, ProtectedAlertDto} from "./Alert";
 
 export interface MemberAttributes extends RecordableEntityAttributes {
-  slackId: string;
-  name: string;
-  email: string;
-  isDeleted: boolean;
-  isRestricted: boolean;
-  isUltraRestricted: boolean;
-  isAdmin: boolean;
-  isMobilized: boolean;
-  isExemptFromCheckIn: boolean;
-  isOptedOutOfMap: boolean;
-  checkInToken: Nullable<string>;
-  checkIn: Nullable<CheckIn>;
+    slackId: string;
+    name: string;
+    email: string;
+    projectManagerEmail: string;
+    isDeleted: boolean;
+    isRestricted: boolean;
+    isUltraRestricted: boolean;
+    isAdmin: boolean;
+    isMobilized: boolean;
+    isExemptFromCheckIn: boolean;
+    isOptedOutOfMap: boolean;
+    checkInToken: Nullable<string>;
+    alertToken: Nullable<string>;
+    checkIn: Nullable<CheckIn>;
+    alert: Nullable<Alert>;
 }
 
 export type MemberDto = Omit<MemberAttributes, 'createdAt' | 'updatedAt'>
-  & SerializableTimestamps
-  & { checkIn: Nullable<CheckInDto> };
+    & SerializableTimestamps
+    & { checkIn: Nullable<CheckInDto> }
+    & { alert: Nullable<AlertDto> };
 
 export type ProtectedMemberDto = Omit<MemberAttributes, 'isMobilized'
-  | 'isAdmin'
-  | 'checkInToken'
-  | 'isExemptFromCheckIn'
-  | 'isOptedOutOfMap'>
-  & { checkIn: Nullable<ProtectedCheckInDto> };
+        | 'isAdmin'
+        | 'checkInToken'
+        | 'alertToken'
+        | 'checkIn'
+        | 'alert'
+        | 'isExemptFromCheckIn'
+        | 'isOptedOutOfMap'>
+    & { checkIn: Nullable<ProtectedCheckInDto> }
+    & { alert: Nullable<ProtectedAlertDto> }
 
 export type AnyMemberDto = MemberDto | ProtectedMemberDto;
 
 export type MemberIsAttribute = keyof Pick<Member, 'isAdmin'
-  | 'isMobilized'
-  | 'isExemptFromCheckIn'
-  | 'isOptedOutOfMap'>;
+    | 'isMobilized'
+    | 'isExemptFromCheckIn'
+    | 'isOptedOutOfMap'>;
 
 export class Member extends RecordableEntity implements IDtoable<MemberDto>, IProtectedDtoable<ProtectedMemberDto> {
-  public readonly slackId: string;
+    public readonly slackId: string;
 
-  public name: string;
+    public name: string;
 
-  public email: string;
+    public email: string;
 
-  public isDeleted: boolean;
+    public projectManagerEmail: string;
 
-  public isRestricted: boolean;
+    public isDeleted: boolean;
 
-  public isUltraRestricted: boolean;
+    public isRestricted: boolean;
 
-  public isAdmin: boolean;
+    public isUltraRestricted: boolean;
 
-  public isMobilized: boolean;
+    public isAdmin: boolean;
 
-  public isExemptFromCheckIn: boolean;
+    public isMobilized: boolean;
 
-  public isOptedOutOfMap: boolean;
+    public isExemptFromCheckIn: boolean;
 
-  public checkInToken: Nullable<string>;
+    public isOptedOutOfMap: boolean;
 
-  public readonly checkIn: Nullable<CheckIn>;
+    public checkInToken: Nullable<string>;
 
-  constructor(params: MemberAttributes) {
-    super(params);
+    public alertToken: Nullable<string>;
 
-    this.slackId = params.slackId;
-    this.name = params.name;
-    this.email = params.email;
-    this.isDeleted = params.isDeleted;
-    this.isRestricted = params.isRestricted;
-    this.isUltraRestricted = params.isUltraRestricted;
-    this.isAdmin = params.isAdmin;
-    this.isMobilized = params.isMobilized;
-    this.isExemptFromCheckIn = params.isExemptFromCheckIn;
-    this.isOptedOutOfMap = params.isOptedOutOfMap;
-    this.checkInToken = params.checkInToken;
-    this.checkIn = params.checkIn;
-  }
+    public readonly checkIn: Nullable<CheckIn>;
 
-  public setName(name: string): void {
-    this.name = name;
-  }
+    public readonly alert: Nullable<Alert>
 
-  public setEmail(email: string): void {
-    this.email = email;
-  }
+    constructor(params: MemberAttributes) {
+        super(params);
 
-  public setIsAdmin(bool: boolean): void {
-    this.isAdmin = bool;
-  }
+        this.slackId = params.slackId;
+        this.name = params.name;
+        this.email = params.email;
+        this.projectManagerEmail = params.projectManagerEmail
+        this.isDeleted = params.isDeleted;
+        this.isRestricted = params.isRestricted;
+        this.isUltraRestricted = params.isUltraRestricted;
+        this.isAdmin = params.isAdmin;
+        this.isMobilized = params.isMobilized;
+        this.isExemptFromCheckIn = params.isExemptFromCheckIn;
+        this.isOptedOutOfMap = params.isOptedOutOfMap;
+        this.checkInToken = params.checkInToken;
+        this.checkIn = params.checkIn;
+        this.alertToken = params.alertToken;
+        this.alert = params.alert;
+    }
 
-  public setIsRestricted(isRestricted: boolean): void {
-    this.isRestricted = isRestricted;
-  }
+    public setName(name: string): void {
+        this.name = name;
+    }
 
-  public setIsUltraRestricted(isUltraRestricted: boolean): void {
-    this.isUltraRestricted = isUltraRestricted;
-  }
+    public setEmail(email: string): void {
+        this.email = email;
+    }
 
-  public setIsDeleted(isDeleted: boolean): void {
-    this.isDeleted = isDeleted;
-  }
+    public setProjectManagerEmail(projectManagerEmail: string): void {
+        this.projectManagerEmail = projectManagerEmail;
+    }
 
-  public setIsMobilized(bool: boolean): void {
-    this.isMobilized = bool;
-  }
+    public setIsAdmin(bool: boolean): void {
+        this.isAdmin = bool;
+    }
 
-  public setIsExemptFromCheckIn(isExemptFromCheckIn: boolean): void {
-    this.isExemptFromCheckIn = isExemptFromCheckIn;
-  }
+    public setIsRestricted(isRestricted: boolean): void {
+        this.isRestricted = isRestricted;
+    }
 
-  public setIsOptedOutOfMap(isOptedOutOfMap: boolean): void {
-    this.isOptedOutOfMap = isOptedOutOfMap;
-  }
+    public setIsUltraRestricted(isUltraRestricted: boolean): void {
+        this.isUltraRestricted = isUltraRestricted;
+    }
 
-  public setCheckInToken(checkInToken: Nullable<string>): void {
-    this.checkInToken = checkInToken;
-  }
+    public setIsDeleted(isDeleted: boolean): void {
+        this.isDeleted = isDeleted;
+    }
 
-  public toDto(): MemberDto {
-    const { checkIn, createdAt, updatedAt, ...rest } = this;
-    return Object.freeze({
-      ...rest,
-      ...this.getSerializableTimestamps(),
-      checkIn: checkIn ? checkIn.toDto() : null,
-    });
-  }
+    public setIsMobilized(bool: boolean): void {
+        this.isMobilized = bool;
+    }
 
-  public toProtectedDto(): ProtectedMemberDto {
-    const {
-      isAdmin,
-      isMobilized,
-      isExemptFromCheckIn,
-      isOptedOutOfMap,
-      checkInToken,
-      checkIn,
-      ...rest
-    } = this;
+    public setIsExemptFromCheckIn(isExemptFromCheckIn: boolean): void {
+        this.isExemptFromCheckIn = isExemptFromCheckIn;
+    }
 
-    return Object.freeze({
-      ...rest,
-      ...this.getSerializableTimestamps(),
-      checkIn: checkIn ? checkIn.toProtectedDto() : null,
-    });
-  }
+    public setIsOptedOutOfMap(isOptedOutOfMap: boolean): void {
+        this.isOptedOutOfMap = isOptedOutOfMap;
+    }
+
+    public setCheckInToken(checkInToken: Nullable<string>): void {
+        this.checkInToken = checkInToken;
+    }
+
+    public setAlertToken(alertToken: Nullable<string>): void {
+        this.alertToken = alertToken;
+    }
+
+    public toDto(): MemberDto {
+        const {checkIn, alert, createdAt, updatedAt, ...rest} = this;
+        return Object.freeze({
+            ...rest,
+            ...this.getSerializableTimestamps(),
+            checkIn: checkIn ? checkIn.toDto() : null,
+            alert: alert ? alert.toDto() : null,
+        });
+    }
+
+    public toProtectedDto(): ProtectedMemberDto {
+        const {
+            isAdmin,
+            isMobilized,
+            isExemptFromCheckIn,
+            isOptedOutOfMap,
+            checkInToken,
+            alertToken,
+            checkIn,
+            alert,
+            ...rest
+        } = this;
+
+        return Object.freeze({
+            ...rest,
+            ...this.getSerializableTimestamps(),
+            checkIn: checkIn ? checkIn.toProtectedDto() : null,
+            alert: alert ? alert.toProtectedDto() : null,
+        });
+    }
 }

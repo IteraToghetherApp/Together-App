@@ -1,5 +1,5 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {memberService, locationService} from '../../services';
+import {checkInMemberService, locationService} from '../../services';
 import {NoLocationParamsProvidedError} from '../../exceptions';
 import {handleAPIErrors, validateHttpMethod, validateMemberCheckInToken} from '../../helpers/server';
 import type {Location} from '../../entities';
@@ -37,7 +37,7 @@ export default async function SubmitCheckIn(req: NextApiRequest, res: NextApiRes
             comment,
         }: Payload = req.body;
 
-        const member = await memberService.getById(memberId);
+        const member = await checkInMemberService.getById(memberId);
 
         validateMemberCheckInToken({member, checkInToken});
 
@@ -55,7 +55,7 @@ export default async function SubmitCheckIn(req: NextApiRequest, res: NextApiRes
             throw new NoLocationParamsProvidedError();
         }
 
-        await memberService.checkIn({
+        await checkInMemberService.checkIn({
             member,
             attributes: {
                 ...location,

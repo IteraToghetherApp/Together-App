@@ -1,14 +1,26 @@
-import { ALLOWED_REFERRER_ID, HOST } from '../../config';
-import { CheckInPageQuery, CheckInRedirectLinkParams, getQueryString } from '../client/link';
+import {ALLOWED_REFERRER_ID, HOST} from '../../config';
+import {AlertPageQuery, CheckInPageQuery, CheckInRedirectLinkParams, getQueryString} from '../client/link';
 
 export const getCheckInRedirectLink = (params: CheckInRedirectLinkParams): string => {
-  const { member, isProxy } = params;
-  const queryString = getQueryString<CheckInPageQuery>({
-    memberId: member.id,
-    checkInToken: member.checkInToken,
-    referrerId: ALLOWED_REFERRER_ID,
-    ...isProxy ? { defaultToSearch: true } : {},
-  });
+    const {member, isProxy} = params;
+    const queryString = getQueryString<CheckInPageQuery>({
+        memberId: member.id,
+        checkInToken: member.checkInToken,
+        referrerId: ALLOWED_REFERRER_ID,
+        ...isProxy ? {defaultToSearch: true} : {},
+    });
 
-  return `${HOST}/check-in${queryString}`;
+    return `${HOST}/check-in${queryString}`;
+};
+
+export const getAlertRedirectLink = (params: CheckInRedirectLinkParams): string => {
+    const {member, isProxy} = params;
+    const queryString = getQueryString<AlertPageQuery>({
+        memberId: member.id,
+        alertToken: member.alertToken,
+        referrerId: ALLOWED_REFERRER_ID,
+        ...isProxy ? {defaultToSearch: true} : {},
+    });
+
+    return `${HOST}/alert${queryString}`;
 };

@@ -1,7 +1,9 @@
-import {checkInIsCloserPerShortTime, checkInIsCloserPerLongTime} from './date';
+import {checkInIsCloserPerLongTime, checkInIsCloserPerShortTime} from './date';
 
 import type {CheckInDto, MemberDto} from '../../entities';
-import type {CheckInString, BooleanPropString} from '../../types';
+import type {BooleanPropString, CheckInString} from '../../types';
+import {AlertString} from "../../types";
+import {AlertDto} from "../../entities/Alert";
 
 export const filterMembersByCountry = (countryQuery: string, members: MemberDto[]): MemberDto[] => {
     return members.filter(({checkIn}) => checkIn && checkIn.country === countryQuery);
@@ -44,6 +46,14 @@ export const filterMembersByIsSafe = (isSafe: BooleanPropString, members: Member
     });
 };
 
+export const filterMembersByAlert = (alert: AlertString, members: MemberDto[]): MemberDto[] => {
+    return filterMembersByAlertValue({
+        members,
+        value: alert,
+        prop: 'isSafe',
+    });
+};
+
 export const filterMembersByCanWork = (canWork: BooleanPropString, members: MemberDto[]): MemberDto[] => {
     return filterMembersByBoolCheckInValue({
         members,
@@ -58,12 +68,33 @@ type FilterMemberByBoolCheckInValueParams = {
     members: MemberDto[];
 }
 
+type FilterMemberByAlertValueParams = {
+    value: AlertString;
+    prop: keyof AlertDto;
+    members: MemberDto[];
+}
+
 const filterMembersByBoolCheckInValue = ({value, prop, members}: FilterMemberByBoolCheckInValueParams): MemberDto[] => {
     switch (value) {
         case 'yes':
             return members.filter((member) => member.checkIn && member.checkIn[prop] === true);
         case 'no':
             return members.filter((member) => member.checkIn && member.checkIn[prop] === false);
+        case 'both':
+            return members;
+        default:
+            return members;
+    }
+};
+
+const filterMembersByAlertValue = ({value, prop, members}: FilterMemberByAlertValueParams): MemberDto[] => {
+    switch (value) {
+        case 'yes':
+            return members.filter((member) => member.alert && member.alert[prop] === true);
+        case 'no':
+            return members.filter((member) => member.alert && member.alert[prop] === false);
+        case 'never':
+            return members.filter((member) => member.alert === null);
         case 'both':
             return members;
         default:

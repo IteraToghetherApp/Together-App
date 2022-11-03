@@ -1,5 +1,5 @@
 import {ProtectedCheckInDto} from '../../entities';
-import {isAfter, isBefore, subHours, addDays, subDays} from 'date-fns';
+import {addDays, isAfter, isBefore, subDays, subHours} from 'date-fns';
 import {TYPE_APP} from "../../config/custom/app-config";
 
 import type {Nullable} from '../../types';

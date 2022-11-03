@@ -11,12 +11,14 @@ model MemberRecord {
   id                    String          @id @Db.Uuid
   slackId               String          @unique
   email                 String          @unique
+  projectManagerEmail   String          @default("")
   name                  String
   isAdmin               Boolean         @default(false)
   isMobilized           Boolean         @default(false)
   isExemptFromCheckIn   Boolean         @default(true)
   isOptedOutOfMap       Boolean         @default(false)
   checkInToken          String?         @Db.Uuid
+  alertToken            String?         @Db.Uuid
   isRestricted          Boolean         @default(false)
   isUltraRestricted     Boolean         @default(false)
   isDeleted             Boolean         @default(false)
@@ -26,6 +28,7 @@ model MemberRecord {
   // Relationships
 
   checkins              CheckInRecord[]
+  alerts                AlertRecord[]
 
   @@map(name: "members")
 }
@@ -52,4 +55,19 @@ model CheckInRecord {
   member                MemberRecord    @relation(fields: [memberId], references: [id])
 
   @@map(name: "checkins")
+}
+
+model AlertRecord {
+  id                    String          @id @Db.Uuid
+  isSafe                Boolean
+  comment               String?
+  memberId              String          @Db.Uuid
+  createdAt             DateTime?       @default(now())
+  updatedAt             DateTime?       @updatedAt
+
+  // Relationships
+
+  member                MemberRecord    @relation(fields: [memberId], references: [id])
+
+  @@map(name: "alerts")
 }

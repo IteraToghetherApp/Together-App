@@ -1,164 +1,203 @@
-import { buffer } from 'micro';
+import {buffer} from 'micro';
 import crypto from 'crypto';
 import tsscmp from 'tsscmp';
-import type { NextApiRequest } from 'next';
-import { InvalidSlackRequestError } from '../exceptions';
-import { getCheckInRedirectLink } from '../helpers/server';
-import type {
-  CheckboxesAction,
-  UsersSelectAction,
-  BlockAction,
-} from '@slack/bolt';
+import type {NextApiRequest} from 'next';
+import {InvalidSlackRequestError} from '../exceptions';
+import {getAlertRedirectLink, getCheckInRedirectLink} from '../helpers/server';
+import type {BlockAction, CheckboxesAction, UsersSelectAction,} from '@slack/bolt';
 
 import type {
-  ISlackRequestService,
-  IModalService,
-  IMemberService,
-  ActionHandlerParams,
-  NonSlashCommandAction,
+    ActionHandlerParams,
+    IMemberService,
+    IModalService,
+    ISlackRequestService,
+    NonSlashCommandAction,
 } from './interfaces';
 
 export interface SlackRequestServiceParams {
-  signingSecret: string;
-  modalService: IModalService;
-  memberService: IMemberService;
+    signingSecret: string;
+    modalService: IModalService;
+    memberService: IMemberService;
 }
 
 export class SlackRequestService implements ISlackRequestService {
-  private readonly signingSecret: string;
+    private readonly signingSecret: string;
 
-  private readonly modalService: IModalService;
+    private readonly modalService: IModalService;
 
-  private readonly memberService: IMemberService;
+    private readonly memberService: IMemberService;
 
-  constructor(params: SlackRequestServiceParams) {
-    this.signingSecret = params.signingSecret;
-    this.modalService = params.modalService;
-    this.memberService = params.memberService;
-  }
-
-  public async validateSlackRequestAndReturnBuffer(req: NextApiRequest): Promise<Buffer> {
-    const reqBuffer = await buffer(req);
-    const requestSignature = req.headers['x-slack-signature'] as string;
-    const requestTimestamp = req.headers['x-slack-request-timestamp'];
-    const hmac = crypto.createHmac('sha256', this.signingSecret);
-    const [version, hash] = requestSignature.split('=');
-    const base = `${version}:${requestTimestamp}:${reqBuffer}`;
-
-    hmac.update(base);
-
-    const isValid = tsscmp(hash, hmac.digest('hex'));
-
-    if (!isValid) {
-      throw new InvalidSlackRequestError();
+    constructor(params: SlackRequestServiceParams) {
+        this.signingSecret = params.signingSecret;
+        this.modalService = params.modalService;
+        this.memberService = params.memberService;
     }
 
-    return reqBuffer as Buffer;
-  }
+    public async validateSlackRequestAndReturnBuffer(req: NextApiRequest): Promise<Buffer> {
+        const reqBuffer = await buffer(req);
+        const requestSignature = req.headers['x-slack-signature'] as string;
+        const requestTimestamp = req.headers['x-slack-request-timestamp'];
+        const hmac = crypto.createHmac('sha256', this.signingSecret);
+        const [version, hash] = requestSignature.split('=');
+        const base = `${version}:${requestTimestamp}:${reqBuffer}`;
 
-  public async handleRenderMainMenu(params: ActionHandlerParams<BlockAction>): Promise<void> {
-    const { body, member, modalServiceParams } = params;
-    const containsCheckboxValue = Boolean((body.actions[0] as CheckboxesAction).selected_options);
+        hmac.update(base);
 
-    if (containsCheckboxValue) {
-      const isOptedOutOfMap = !Boolean((body.actions[0] as CheckboxesAction).selected_options[0]);
+        const isValid = tsscmp(hash, hmac.digest('hex'));
 
-      const updatedMember = await this.memberService.setIsAttribute({
-        member,
-        attribute: 'isOptedOutOfMap',
-        value: isOptedOutOfMap,
-      });
+        if (!isValid) {
+            throw new InvalidSlackRequestError();
+        }
 
-      return this.modalService.renderMainMenu({
-        ...modalServiceParams,
-        member: updatedMember,
-        isFromSlashCommand: false,
-      });
+        return reqBuffer as Buffer;
     }
 
-    return this.modalService.renderMainMenu({
-      ...modalServiceParams,
-      member: member,
-      isFromSlashCommand: false,
-    });
-  }
+    public async handleRenderMainMenu(params: ActionHandlerParams<BlockAction>): Promise<void> {
+        const {body, member, modalServiceParams} = params;
+        const containsCheckboxValue = Boolean((body.actions[0] as CheckboxesAction).selected_options);
 
-  public async handleRenderCheckInSelfConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
-    const { member, modalServiceParams } = params;
-    const memberWithToken = await this.memberService.issueCheckInToken(member);
-    const url = getCheckInRedirectLink({
-      member: memberWithToken,
-      isProxy: false,
-    });
+        if (containsCheckboxValue) {
+            const isOptedOutOfMap = !Boolean((body.actions[0] as CheckboxesAction).selected_options[0]);
 
-    return this.modalService.renderCheckInSelfConfirmation({
-      ...modalServiceParams,
-      url,
-      member: memberWithToken,
-      isFromRepeatCheckIn: false,
-    });
-  }
+            const updatedMember = await this.memberService.setIsAttribute({
+                member,
+                attribute: 'isOptedOutOfMap',
+                value: isOptedOutOfMap,
+            });
 
-  public async handleRenderCheckInOtherMemberConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
-    const { body, member, modalServiceParams } = params;
-    const memberId = body.type === 'block_actions' && body.actions[0]
-      ? (body.actions[0] as UsersSelectAction).selected_user
-      : null;
-    const forMember = memberId
-      ? await this.memberService.findBySlackId(memberId)
-      : null;
-    const memberWithToken = forMember
-      ? await this.memberService.issueCheckInToken(forMember)
-      : null;
-    const hasError = Boolean(memberId && !memberWithToken);
-    const url = memberWithToken
-      ? getCheckInRedirectLink({
-        member: memberWithToken,
-        isProxy: true,
-      })
-      : null;
+            return this.modalService.renderCheckInMainMenu({
+                ...modalServiceParams,
+                member: updatedMember,
+                isFromSlashCommand: false,
+            });
+        }
 
-    return this.modalService.renderCheckInOtherMemberConfirmation({
-      url,
-      hasError,
-      ...modalServiceParams,
-      member: memberWithToken || null,
-      requester: member,
-    });
-  }
-
-  public async handleRenderRepeatCheckInConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
-    const { member, modalServiceParams } = params;
-
-    if (!member.checkIn) {
-      const memberWithToken = await this.memberService.issueCheckInToken(member);
-      const url = getCheckInRedirectLink({
-        member: memberWithToken,
-        isProxy: false,
-      });
-
-      return this.modalService.renderCheckInSelfConfirmation({
-        ...modalServiceParams,
-        url,
-        member: memberWithToken,
-        isFromRepeatCheckIn: true,
-      });
+        return this.modalService.renderCheckInMainMenu({
+            ...modalServiceParams,
+            member: member,
+            isFromSlashCommand: false,
+        });
     }
 
-    return this.modalService.renderRepeatCheckInConfirmation({ member, ...modalServiceParams });
-  }
+    public async handleRenderAlertMainMenu(params: ActionHandlerParams<BlockAction>): Promise<void> {
+        const {body, member, modalServiceParams} = params;
+        const containsCheckboxValue = Boolean((body.actions[0] as CheckboxesAction).selected_options);
 
-  public async handleClickConfirmAndRepeat(params: ActionHandlerParams<BlockAction>): Promise<void> {
-    const { member, modalServiceParams } = params;
+        if (containsCheckboxValue) {
+            const isOptedOutOfMap = !Boolean((body.actions[0] as CheckboxesAction).selected_options[0]);
 
-    await this.memberService.repeatCheckIn(member);
+            const updatedMember = await this.memberService.setIsAttribute({
+                member,
+                attribute: 'isOptedOutOfMap',
+                value: isOptedOutOfMap,
+            });
 
-    return this.modalService.renderSuccessConfirm({ member, ...modalServiceParams });
-  }
+            return this.modalService.renderAlertMainMenu({
+                ...modalServiceParams,
+                member: updatedMember,
+                isFromSlashCommand: false,
+            });
+        }
 
-  public async handleRenderSuccess(params: ActionHandlerParams<BlockAction>): Promise<void> {
-    const { member, modalServiceParams } = params;
+        return this.modalService.renderAlertMainMenu({
+            ...modalServiceParams,
+            member: member,
+            isFromSlashCommand: false,
+        });
+    }
 
-    return this.modalService.renderSuccess({ member, ...modalServiceParams });
-  }
+    public async handleRenderCheckInSelfConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
+        const {member, modalServiceParams} = params;
+        const memberWithToken = await this.memberService.issueCheckInToken(member);
+        const url = getCheckInRedirectLink({
+            member: memberWithToken,
+            isProxy: false,
+        });
+
+        return this.modalService.renderCheckInSelfConfirmation({
+            ...modalServiceParams,
+            url,
+            member: memberWithToken,
+            isFromRepeatCheckIn: false,
+        });
+    }
+
+    public async handleAlertConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
+        const {member, modalServiceParams} = params;
+        const memberWithToken = await this.memberService.issueAlertToken(member);
+        const url = getAlertRedirectLink({
+            member: memberWithToken,
+            isProxy: false,
+        });
+
+        return this.modalService.renderAlertSelfConfirmation({
+            ...modalServiceParams,
+            url,
+            member: memberWithToken,
+            isFromRepeatCheckIn: false,
+        });
+    }
+
+    public async handleRenderCheckInOtherMemberConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
+        const {body, member, modalServiceParams} = params;
+        const memberId = body.type === 'block_actions' && body.actions[0]
+            ? (body.actions[0] as UsersSelectAction).selected_user
+            : null;
+        const forMember = memberId
+            ? await this.memberService.findBySlackId(memberId)
+            : null;
+        const memberWithToken = forMember
+            ? await this.memberService.issueCheckInToken(forMember)
+            : null;
+        const hasError = Boolean(memberId && !memberWithToken);
+        const url = memberWithToken
+            ? getCheckInRedirectLink({
+                member: memberWithToken,
+                isProxy: true,
+            })
+            : null;
+
+        return this.modalService.renderCheckInOtherMemberConfirmation({
+            url,
+            hasError,
+            ...modalServiceParams,
+            member: memberWithToken || null,
+            requester: member,
+        });
+    }
+
+    public async handleRenderRepeatCheckInConfirmation(params: ActionHandlerParams<NonSlashCommandAction>): Promise<void> {
+        const {member, modalServiceParams} = params;
+
+        if (!member.checkIn) {
+            const memberWithToken = await this.memberService.issueCheckInToken(member);
+            const url = getCheckInRedirectLink({
+                member: memberWithToken,
+                isProxy: false,
+            });
+
+            return this.modalService.renderCheckInSelfConfirmation({
+                ...modalServiceParams,
+                url,
+                member: memberWithToken,
+                isFromRepeatCheckIn: true,
+            });
+        }
+
+        return this.modalService.renderRepeatCheckInConfirmation({member, ...modalServiceParams});
+    }
+
+    public async handleClickConfirmAndRepeat(params: ActionHandlerParams<BlockAction>): Promise<void> {
+        const {member, modalServiceParams} = params;
+
+        await this.memberService.repeatCheckIn(member);
+
+        return this.modalService.renderSuccessConfirm({member, ...modalServiceParams});
+    }
+
+    public async handleRenderSuccess(params: ActionHandlerParams<BlockAction>): Promise<void> {
+        const {member, modalServiceParams} = params;
+
+        return this.modalService.renderSuccess({member, ...modalServiceParams});
+    }
 }
