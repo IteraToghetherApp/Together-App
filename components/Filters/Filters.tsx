@@ -5,12 +5,13 @@ import styles from './Filters.module.sass';
 import type {BooleanPropString, CheckInString} from '../../types';
 import type {MemberDto} from '../../entities';
 import {
-    TYPE_APP,
     option_24_hour,
     option_48_hour,
+    option_current_month,
     option_current_week,
+    option_last_month,
     option_last_week,
-    option_current_month, option_last_month
+    TYPE_APP
 } from "../../config/custom/app-config";
 
 export const supportValues = [
@@ -18,6 +19,12 @@ export const supportValues = [
     'Help only with a request for accommodation at the time of temporary relocation',
     'Organize temporary relocation (2-4 days), including transportation',
     'Other (provide comment)'
+]
+
+export const electricityValues = [
+    'I can work 40 hours a week from home',
+    'I can work 40 hours a week in a combined home & office regime',
+    'It is not possible to work 40 hours and visit the office - the reason in the comment'
 ]
 
 interface FiltersProps {
@@ -40,6 +47,8 @@ interface FiltersProps {
     handleIsMobilizedFilter: (isMobilized: BooleanPropString) => void;
     filterSupport: string;
     handleFilterSupport: (support: string) => void;
+    filterElectricityCondition: string;
+    handleFilterElectricityCondition: (support: string) => void;
     filterIsExemptFromCheckIn: BooleanPropString;
     handleIsExemptFromCheckInFilter: (isExemptFromCheckIn: BooleanPropString) => void;
     handleClearFilters: () => void;
@@ -65,6 +74,8 @@ const Filters: React.FC<FiltersProps> = ({
                                              handleCanWorkFilter,
                                              filterSupport,
                                              handleFilterSupport,
+                                             filterElectricityCondition,
+                                             handleFilterElectricityCondition,
                                              filterIsExemptFromCheckIn,
                                              handleIsExemptFromCheckInFilter,
                                              handleClearFilters,
@@ -108,6 +119,10 @@ const Filters: React.FC<FiltersProps> = ({
 
     const changeSupportFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
         handleFilterSupport(e.target.value as string);
+    };
+
+    const changeElectricityFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        handleFilterElectricityCondition(e.target.value as string);
     };
 
     const changeIsExemptFromCheckInFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -208,6 +223,18 @@ const Filters: React.FC<FiltersProps> = ({
                         <option value='2'>{supportValues[1]}</option>
                         <option value='3'>{supportValues[2]}</option>
                         <option value='4'>{supportValues[3]}</option>
+                    </Select>
+                    <Select
+                        scale='small'
+                        label='Electricity condition'
+                        value={filterElectricityCondition}
+                        onChange={changeElectricityFilter}
+                        className={styles.select}
+                    >
+                        <option value=''>All</option>
+                        <option value='1'>{electricityValues[0]}</option>
+                        <option value='2'>{electricityValues[1]}</option>
+                        <option value='3'>{electricityValues[2]}</option>
                     </Select>
                     <Select
                         scale='small'

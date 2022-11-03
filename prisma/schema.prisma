@@ -42,6 +42,7 @@ model CheckInRecord {
   support               String?
   numberOfPeopleToRelocate Int?
   otherSupport          String?
+  electricityCondition  String?
   comment               String?
   memberId              String          @Db.Uuid
   createdAt             DateTime?       @default(now())

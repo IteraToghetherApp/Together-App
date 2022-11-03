@@ -1,7 +1,7 @@
-import {checkInIsCloserPerShortTime, checkInIsCloserPerLongTime} from './date';
+import {checkInIsCloserPerLongTime, checkInIsCloserPerShortTime} from './date';
 
 import type {CheckInDto, MemberDto} from '../../entities';
-import type {CheckInString, BooleanPropString} from '../../types';
+import type {BooleanPropString, CheckInString} from '../../types';
 
 export const filterMembersByCountry = (countryQuery: string, members: MemberDto[]): MemberDto[] => {
     return members.filter(({checkIn}) => checkIn && checkIn.country === countryQuery);
@@ -81,6 +81,19 @@ export const filterMembersBySupport = (support: string, members: MemberDto[]): M
             return members.filter((member) => member.checkIn && member.checkIn.support === '3')
         case '4':
             return members.filter((member) => member.checkIn && member.checkIn.support === '4')
+        default:
+            return members
+    }
+};
+
+export const filterMembersByElectricityCondition = (electricityCondition: string, members: MemberDto[]): MemberDto[] => {
+    switch (electricityCondition) {
+        case '1':
+            return members.filter((member) => member.checkIn && member.checkIn.electricityCondition === '1')
+        case '2':
+            return members.filter((member) => member.checkIn && member.checkIn.electricityCondition === '2')
+        case '3':
+            return members.filter((member) => member.checkIn && member.checkIn.electricityCondition === '3')
         default:
             return members
     }

@@ -1,5 +1,5 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {memberService, locationService} from '../../services';
+import {locationService, memberService} from '../../services';
 import {NoLocationParamsProvidedError} from '../../exceptions';
 import {handleAPIErrors, validateHttpMethod, validateMemberCheckInToken} from '../../helpers/server';
 import type {Location} from '../../entities';
@@ -13,6 +13,7 @@ interface Payload {
     isSafe: boolean;
     isAbleToWork: boolean;
     support: Nullable<string>;
+    electricityCondition: Nullable<string>;
     numberOfPeopleToRelocate: Nullable<number>;
     otherSupport: Nullable<string>;
     comment: string;
@@ -32,6 +33,7 @@ export default async function SubmitCheckIn(req: NextApiRequest, res: NextApiRes
             isSafe,
             isAbleToWork,
             support,
+            electricityCondition,
             numberOfPeopleToRelocate,
             otherSupport,
             comment,
@@ -62,6 +64,7 @@ export default async function SubmitCheckIn(req: NextApiRequest, res: NextApiRes
                 isSafe,
                 isAbleToWork,
                 support,
+                electricityCondition,
                 numberOfPeopleToRelocate: numberOfPeopleToRelocate != null ? Number(numberOfPeopleToRelocate) : null,
                 otherSupport: !!otherSupport?.length ? otherSupport : null,
                 comment: !!comment.length ? comment : null,
