@@ -4,7 +4,8 @@ import {
     AccordionCollapsible,
     AccordionTrigger,
     Banner,
-    FormRow,
+    field_about_electrician,
+    alert-bot,
     Grid,
     GridCell,
     GridRow,
@@ -33,10 +34,11 @@ import styles from './MemberList.module.sass';
 import DownloadCSV from '../DownloadCSV/DownloadCSV';
 import type {MemberDto} from '../../entities';
 import {Nullable} from "../../types";
-import {supportValues} from "../Filters/Filters";
+import {electricityValues, supportValues} from "../Filters/Filters";
 import {Button} from "@macpaw/macpaw-ui/lib/ui";
 import {InputValueType} from "@macpaw/macpaw-ui/lib/types";
 import axios from "axios";
+
 
 interface MemberListProps {
     teamId: string;
@@ -77,6 +79,23 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
         }
     }
 
+
+    function displayTextElectricityCondition(electricityCondition: Nullable<string>) {
+        if (electricityCondition == null) {
+            return false;
+        }
+        switch (electricityCondition) {
+            case "1":
+                return electricityValues[0];
+            case "2":
+                return electricityValues[1];
+            case "3":
+                return electricityValues[2];
+            default:
+                return false;
+        }
+    }
+
     const projectManagerEmailChange = (value: InputValueType) => {
         setProjectManagerEmailForUpdate(value as string);
     };
@@ -97,6 +116,7 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                 console.log("Error with update PM!")
             });
     };
+
 
     return (
         <>
@@ -266,6 +286,8 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                                                 {getDisplayTextFromBool(member.isMobilized)}
                                             </GridCell>
                                             <GridCell type='secondary'>
+                                                <Label>Electricity Condition</Label>
+                                                <span>{member.checkIn && displayTextElectricityCondition(member.checkIn.electricityCondition)}</span>
                                             </GridCell>
                                         </GridRow>
                                         <GridRow>

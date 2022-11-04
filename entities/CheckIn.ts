@@ -14,13 +14,14 @@ export interface CheckInAttributes extends RecordableEntityAttributes {
     support: Nullable<string>;
     numberOfPeopleToRelocate: Nullable<number>;
     otherSupport: Nullable<string>;
+    electricityCondition: Nullable<string>;
     comment: Nullable<string>;
     memberId: string;
 }
 
 export type CheckInDto = Omit<CheckInAttributes, 'createdAt' | 'updatedAt'> & SerializableTimestamps;
 
-export type ProtectedCheckInDto = Omit<CheckInDto, 'isSafe' | 'isAbleToWork' | 'support' | 'numberOfPeopleToRelocate' | 'otherSupport' | 'comment'>;
+export type ProtectedCheckInDto = Omit<CheckInDto, 'isSafe' | 'isAbleToWork' | 'support' | 'numberOfPeopleToRelocate' | 'otherSupport' | 'electricityCondition' | 'comment'>;
 
 export class CheckIn extends RecordableEntity implements IDtoable<CheckInDto>, IProtectedDtoable<ProtectedCheckInDto> {
     public readonly latitude: Nullable<number>;
@@ -33,6 +34,7 @@ export class CheckIn extends RecordableEntity implements IDtoable<CheckInDto>, I
     public readonly support: Nullable<string>;
     public readonly numberOfPeopleToRelocate: Nullable<number>;
     public readonly otherSupport: Nullable<string>;
+    public readonly electricityCondition: Nullable<string>;
     public readonly comment: Nullable<string>;
     public readonly memberId: string;
 
@@ -49,6 +51,7 @@ export class CheckIn extends RecordableEntity implements IDtoable<CheckInDto>, I
         this.support = params.support;
         this.numberOfPeopleToRelocate = params.numberOfPeopleToRelocate;
         this.otherSupport = params.otherSupport;
+        this.electricityCondition = params.electricityCondition;
         this.comment = params.comment;
         this.memberId = params.memberId
     }
@@ -67,6 +70,7 @@ export class CheckIn extends RecordableEntity implements IDtoable<CheckInDto>, I
             support,
             numberOfPeopleToRelocate,
             otherSupport,
+            electricityCondition,
             comment,
             ...rest
         } = this;

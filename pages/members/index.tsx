@@ -5,6 +5,10 @@ import {getSession} from 'next-auth/react';
 import Layout from '../../components/Layout/Layout';
 import styles from './Members.module.css';
 import {
+    filterMembersByCanWork,
+    filterMembersByCity,
+    filterMembersByCountry,
+    filterMembersByElectricityCondition,
     filterMembersByAlert,
     filterMembersByCanWork,
     filterMembersByCity,
@@ -23,10 +27,12 @@ import {normalizeString, validateSessionIsValid} from '../../helpers/server';
 import MemberList from '../../components/MemberList/MemberList';
 import Search from '../../components/Search/Search';
 import Filters from '../../components/Filters/Filters';
-import {checkInMemberService} from '../../services';
+
+import {memberService} from '../../services';
 import {InvalidSessionError} from '../../exceptions';
 import type {MemberDto} from '../../entities';
 import type {BooleanPropString, CheckInString} from '../../types';
+import {checkInMemberService} from '../../services';
 import {AlertString} from "../../types";
 import {logger, SLACK_WORKSPACE_ID} from '../../config';
 
@@ -41,6 +47,7 @@ export default function Employees({members, teamId}: MembersProps) {
     const [filterByState, setFilterByState] = useState('');
     const [filterByCity, setFilterByCity] = useState('');
     const [filterIsSafe, setFilterIsSafe] = useState<BooleanPropString>('both');
+    const [filterElectricity, setFilterElectricity] = useState('');
     const [filterAlert, setFilterAlert] = useState<AlertString>('both');
     const [filterIsMobilized, setFilterIsMobilized] = useState<BooleanPropString>('both');
     const [filterCanWork, setFilterCanWork] = useState<BooleanPropString>('both');
@@ -54,6 +61,7 @@ export default function Employees({members, teamId}: MembersProps) {
         setFilterByState('');
         setFilterByCity('');
         setFilterIsSafe('both');
+        setFilterElectricity('');
         setFilterAlert('both');
         setFilterIsMobilized('both');
         setFilterCanWork('both');
@@ -70,6 +78,7 @@ export default function Employees({members, teamId}: MembersProps) {
 
             return memberDto;
         });
+
         setUpToDateMembers(updated);
     };
 
@@ -99,7 +108,7 @@ export default function Employees({members, teamId}: MembersProps) {
         if (filterAlert) {
             filteredList = filterMembersByAlert(filterAlert, filteredList);
         }
-
+        
         if (filterCanWork) {
             filteredList = filterMembersByCanWork(filterCanWork, filteredList);
         }
@@ -110,6 +119,10 @@ export default function Employees({members, teamId}: MembersProps) {
 
         if (filterSupport) {
             filteredList = filterMembersBySupport(filterSupport, filteredList);
+        }
+
+        if (filterElectricity) {
+            filteredList = filterMembersByElectricityCondition(filterElectricity, filteredList);
         }
 
         if (filterIsExemptFromCheckIn) {
@@ -132,6 +145,7 @@ export default function Employees({members, teamId}: MembersProps) {
             filterCanWork,
             filterIsMobilized,
             filterSupport,
+            filterElectricity,
             filterIsExemptFromCheckIn
         ]);
 
@@ -177,6 +191,10 @@ export default function Employees({members, teamId}: MembersProps) {
         setFilterSupport(support);
     };
 
+    const handleElectricityFilter = (electricity: string) => {
+        setFilterElectricity(electricity);
+    };
+
     const handleIsExemptFromCheckInFilter = (IsExemptFromCheckIn: BooleanPropString) => {
         setFilterIsExemptFromCheckIn(IsExemptFromCheckIn);
     };
@@ -206,6 +224,8 @@ export default function Employees({members, teamId}: MembersProps) {
                 handleIsMobilizedFilter={handleIsMobilizedFilter}
                 filterSupport={filterSupport}
                 handleFilterSupport={handleSupportFilter}
+                filterElectricityCondition={filterElectricity}
+                handleFilterElectricityCondition={handleElectricityFilter}
                 filterCanWork={filterCanWork}
                 handleCanWorkFilter={handleCanWorkFilter}
                 filterIsExemptFromCheckIn={filterIsExemptFromCheckIn}
@@ -234,6 +254,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         validateSessionIsValid(session);
 
         const email = normalizeString(session!.user!.email!);
+
         const user = await checkInMemberService.getByEmail(email);
         const members = user.isAdmin
             ? await checkInMemberService.getAll()

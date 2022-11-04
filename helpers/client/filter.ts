@@ -117,6 +117,19 @@ export const filterMembersBySupport = (support: string, members: MemberDto[]): M
     }
 };
 
+export const filterMembersByElectricityCondition = (electricityCondition: string, members: MemberDto[]): MemberDto[] => {
+    switch (electricityCondition) {
+        case '1':
+            return members.filter((member) => member.checkIn && member.checkIn.electricityCondition === '1')
+        case '2':
+            return members.filter((member) => member.checkIn && member.checkIn.electricityCondition === '2')
+        case '3':
+            return members.filter((member) => member.checkIn && member.checkIn.electricityCondition === '3')
+        default:
+            return members
+    }
+};
+
 export const filterMembersByIsMobilized = (isMobilized: BooleanPropString, members: MemberDto[]): MemberDto[] => {
     return filterMembersByBoolValue({
         members,

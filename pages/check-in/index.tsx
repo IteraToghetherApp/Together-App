@@ -6,6 +6,7 @@ import axios from 'axios';
 import {Banner, Button, FormRow, Input, Select} from '@macpaw/macpaw-ui';
 import {InputValueType} from '@macpaw/macpaw-ui/lib/types';
 import {GetServerSideProps} from 'next';
+import {memberService} from '../../services';
 import {checkInMemberService} from '../../services';
 import {AccountIcon, CheckIcon, ErrorIcon, RefreshingIcon,} from '@macpaw/macpaw-ui/lib/Icons/jsx';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
@@ -13,7 +14,7 @@ import styles from './CheckIn.module.sass';
 import {ALLOWED_REFERRER_ID, GOOGLE_PLACES_API_TOKEN, logger} from '../../config';
 import {validateMemberCheckInToken} from '../../helpers/server';
 import {InvalidCheckInTokenError, MemberNotFoundError} from '../../exceptions';
-import {supportValues} from "../../components/Filters/Filters";
+import {electricityValues, supportValues} from "../../components/Filters/Filters";
 
 interface CheckInProps {
     googleApiKey: Nullable<string>;
@@ -37,10 +38,14 @@ export default function CheckIn(props: CheckInProps) {
     const [supportError, setSupportError] = useState<boolean | string>(
         false,
     );
+    const [electricityError, setElectricityError] = useState<boolean | string>(
+        false,
+    );
     const [numberOfPeopleToRelocateValue, setNumberOfPeopleToRelocateValue] = useState(0);
     const [commentValue, setCommentValue] = useState('');
     const [otherSupportValue, setOtherSupportValue] = useState('');
     const [supportValue, setSupportValue] = useState('');
+    const [electricityValue, setElectricityValue] = useState('');
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [globalError, setGlobalError] = useState('');
@@ -111,6 +116,10 @@ export default function CheckIn(props: CheckInProps) {
             setSupportError(errorMessage);
         }
 
+        if (!electricityValue) {
+            setElectricityError(errorMessage);
+        }
+
         if (supportValue === '4' && !otherSupportValue) {
             setSupportError(errorMessage);
         }
@@ -124,12 +133,14 @@ export default function CheckIn(props: CheckInProps) {
                 !isSafeValue.length ||
                 !isAbleToWorkValue.length ||
                 !supportValue.length ||
+                !electricityValue.length ||
                 !placeId
             );
         } else {
             return !Boolean(!isSafeValue.length ||
                 !isAbleToWorkValue.length ||
-                !supportValue.length
+                !supportValue.length ||
+                !electricityValue
             );
         }
     }
@@ -150,6 +161,7 @@ export default function CheckIn(props: CheckInProps) {
                     support: supportValue,
                     numberOfPeopleToRelocate: numberOfPeopleToRelocateValue,
                     otherSupport: otherSupportValue,
+                    electricityCondition: electricityValue,
                     comment: commentValue,
                     placeId: placeId || null,
                 })
@@ -203,6 +215,10 @@ export default function CheckIn(props: CheckInProps) {
         setSupportValue(event.target.value);
     };
 
+    const electricityChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setElectricityError(false);
+        setElectricityValue(event.target.value);
+    };
 
     const numberOfPeopleToRelocateChange = (value: InputValueType) => {
         setNumberOfPeopleToRelocateValue(value as number);
@@ -428,6 +444,23 @@ export default function CheckIn(props: CheckInProps) {
                             label={setInputLabelForOtherSupport()}
                             placeholder='Please, write your text!'
                         />
+                    </FormRow>
+                    <FormRow>
+                        <Select
+                            error={electricityError}
+                            name='electricity'
+                            label='How are you affected by power outages?'
+                            value={electricityValue}
+                            selected=''
+                            onChange={electricityChange}
+                        >
+                            <option disabled value=''>
+                                Select
+                            </option>
+                            <option value='1'>{electricityValues[0]}</option>
+                            <option value='2'>{electricityValues[1]}</option>
+                            <option value='3'>{electricityValues[2]}</option>
+                        </Select>
                     </FormRow>
                     <FormRow>
                         <Input
