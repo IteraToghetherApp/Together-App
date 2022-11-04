@@ -1,5 +1,4 @@
 import type {NextApiRequest, NextApiResponse} from 'next';
-import {locationService, memberService} from '../../services';
 import {checkInMemberService, locationService} from '../../services';
 import {NoLocationParamsProvidedError} from '../../exceptions';
 import {handleAPIErrors, validateHttpMethod, validateMemberCheckInToken} from '../../helpers/server';

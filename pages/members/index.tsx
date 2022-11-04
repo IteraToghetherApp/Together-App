@@ -5,14 +5,11 @@ import {getSession} from 'next-auth/react';
 import Layout from '../../components/Layout/Layout';
 import styles from './Members.module.css';
 import {
-    filterMembersByCanWork,
-    filterMembersByCity,
-    filterMembersByCountry,
-    filterMembersByElectricityCondition,
     filterMembersByAlert,
     filterMembersByCanWork,
     filterMembersByCity,
     filterMembersByCountry,
+    filterMembersByElectricityCondition,
     filterMembersByIsExemptFromCheckIn,
     filterMembersByIsMobilized,
     filterMembersByIsSafe,
@@ -28,11 +25,10 @@ import MemberList from '../../components/MemberList/MemberList';
 import Search from '../../components/Search/Search';
 import Filters from '../../components/Filters/Filters';
 
-import {memberService} from '../../services';
+import {checkInMemberService} from '../../services';
 import {InvalidSessionError} from '../../exceptions';
 import type {MemberDto} from '../../entities';
 import type {BooleanPropString, CheckInString} from '../../types';
-import {checkInMemberService} from '../../services';
 import {AlertString} from "../../types";
 import {logger, SLACK_WORKSPACE_ID} from '../../config';
 
@@ -108,7 +104,7 @@ export default function Employees({members, teamId}: MembersProps) {
         if (filterAlert) {
             filteredList = filterMembersByAlert(filterAlert, filteredList);
         }
-        
+
         if (filterCanWork) {
             filteredList = filterMembersByCanWork(filterCanWork, filteredList);
         }
