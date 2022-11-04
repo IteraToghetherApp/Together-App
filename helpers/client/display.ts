@@ -1,8 +1,9 @@
-import {format, isAfter, subHours} from 'date-fns';
-import {checkInIsCloserPerShortTime, checkInIsCloserPerLongTime, convertDateToUTC} from './date';
-import type {CheckInDto, MemberDto, AnyMemberDto} from '../../entities';
+import {format} from 'date-fns';
+import {checkInIsCloserPerLongTime, checkInIsCloserPerShortTime} from './date';
+import type {AnyMemberDto, CheckInDto, MemberDto} from '../../entities';
 import type {Nullable, TagColor} from '../../types';
 import {TYPE_APP} from "../../config/custom/app-config";
+import {electricityValues, supportValues} from "../../components/Filters/Filters";
 
 type NullableStringArray = Array<string | null>;
 
@@ -120,3 +121,38 @@ export const getDisplayTextFromCheckInBoolByMember = (member: MemberDto, key: ke
 
     return member.checkIn[key] ? 'Yes' : 'No';
 };
+
+export const getDisplayTextSupport = (support: Nullable<string>): string => {
+    if (support == null) {
+        return 'Unknown';
+    }
+    switch (support) {
+        case "1":
+            return supportValues[0];
+        case "2":
+            return supportValues[1];
+        case "3":
+            return supportValues[2];
+        case "4":
+            return supportValues[3];
+        default:
+            return 'Unknown';
+    }
+}
+
+export const getDisplayTextElectricityCondition = (electricityCondition: Nullable<string>): string => {
+    if (electricityCondition == null) {
+        return 'Unknown';
+    }
+    switch (electricityCondition) {
+        case "1":
+            return electricityValues[0];
+        case "2":
+            return electricityValues[1];
+        case "3":
+            return electricityValues[2];
+        default:
+            return 'Unknown';
+    }
+}
+
