@@ -1,4 +1,4 @@
-import type {Nullable, NotifyOfLateCheckInRule} from '../../types';
+import type {NotifyOfLateCheckInRule, Nullable} from '../../types';
 import {notify_day, notify_month, notify_week, TYPE_APP} from "./app-config";
 
 export const notifyIfNotCheckedInWithinRule: Nullable<NotifyOfLateCheckInRule> = {

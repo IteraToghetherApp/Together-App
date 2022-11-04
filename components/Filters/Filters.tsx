@@ -2,7 +2,7 @@ import React, {useMemo} from 'react';
 import {getCountriesForFilterByMembers} from '../../helpers/client';
 import {Button, Select} from '@macpaw/macpaw-ui';
 import styles from './Filters.module.sass';
-import type {BooleanPropString, CheckInString} from '../../types';
+import type {AlertString, BooleanPropString, CheckInString} from '../../types';
 import type {MemberDto} from '../../entities';
 import {
     option_24_hour,
@@ -39,6 +39,8 @@ interface FiltersProps {
     handleCityFilter: (city: string) => void;
     filterByCheckIn: CheckInString | '';
     handleCheckInFilter: (checkedIn: CheckInString | '') => void;
+    filterAlert: AlertString;
+    handleAlertFilter: (isSafe: AlertString) => void;
     filterIsSafe: BooleanPropString;
     handleIsSafeFilter: (isSafe: BooleanPropString) => void;
     filterCanWork: BooleanPropString;
@@ -66,6 +68,8 @@ const Filters: React.FC<FiltersProps> = ({
                                              handleCityFilter,
                                              filterByCheckIn,
                                              handleCheckInFilter,
+                                             filterAlert,
+                                             handleAlertFilter,
                                              filterIsSafe,
                                              handleIsSafeFilter,
                                              filterIsMobilized,
@@ -107,6 +111,10 @@ const Filters: React.FC<FiltersProps> = ({
 
     const changeIsSafeFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
         handleIsSafeFilter(e.target.value as BooleanPropString);
+    };
+
+    const changeAlertFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        handleAlertFilter(e.target.value as BooleanPropString);
     };
 
     const changeCanWorkFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -246,6 +254,18 @@ const Filters: React.FC<FiltersProps> = ({
                         <option value='both'>All</option>
                         <option value='yes'>Yes</option>
                         <option value='no'>No</option>
+                    </Select>
+                    <Select
+                        scale='small'
+                        label='Alert'
+                        value={filterAlert}
+                        onChange={changeAlertFilter}
+                        className={styles.select}
+                    >
+                        <option value='both'>All</option>
+                        <option value='yes'>Yes</option>
+                        <option value='no'>No</option>
+                        <option value='never'>Never</option>
                     </Select>
 
                     <div className={styles.filtersRow}>

@@ -4,9 +4,12 @@ import {
     AccordionCollapsible,
     AccordionTrigger,
     Banner,
+    field_about_electrician,
+    alert-bot,
     Grid,
     GridCell,
     GridRow,
+    Input,
     Label,
     Tag,
     Tooltip,
@@ -16,6 +19,8 @@ import {InfoIcon} from '@macpaw/macpaw-ui/lib/Icons/jsx';
 import {
     filterMembersByLastCheckInString,
     findMembersByQuery,
+    getAlertStringByMember,
+    getAlertTagColorByMember,
     getCountryTagColorByMember,
     getDisplayTextFromBool,
     getDisplayTextFromCheckInBoolByMember,
@@ -30,6 +35,10 @@ import DownloadCSV from '../DownloadCSV/DownloadCSV';
 import type {MemberDto} from '../../entities';
 import {Nullable} from "../../types";
 import {electricityValues, supportValues} from "../Filters/Filters";
+import {Button} from "@macpaw/macpaw-ui/lib/ui";
+import {InputValueType} from "@macpaw/macpaw-ui/lib/types";
+import axios from "axios";
+
 
 interface MemberListProps {
     teamId: string;
@@ -40,6 +49,10 @@ interface MemberListProps {
 
 const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceMember}: MemberListProps) => {
     const [activeSection, setActiveSection] = useState('');
+    const [projectManagerEmailForUpdate, setProjectManagerEmailForUpdate] = useState('');
+    const [projectManagerEmailForView, setProjectManagerEmailForView] = useState('');
+    const [showResults, setShowResults] = React.useState(false);
+
     const router = useRouter();
     const query = router?.query?.search as string;
     const filteredList = query ? findMembersByQuery(query, members) : members;
@@ -66,6 +79,7 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
         }
     }
 
+
     function displayTextElectricityCondition(electricityCondition: Nullable<string>) {
         if (electricityCondition == null) {
             return false;
@@ -81,6 +95,28 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                 return false;
         }
     }
+
+    const projectManagerEmailChange = (value: InputValueType) => {
+        setProjectManagerEmailForUpdate(value as string);
+    };
+
+
+    const submit = async (e: React.SyntheticEvent, memberDto: MemberDto) => {
+        e.preventDefault();
+
+        axios
+            .post('/api/update-pm-email', {
+                memberId: memberDto.id,
+                projectManagerEmail: projectManagerEmailForUpdate
+            }).then((result) => {
+            setShowResults(false);
+            setProjectManagerEmailForView(result.data.projectManagerEmail)
+        })
+            .catch(<T extends Error>(error: T) => {
+                console.log("Error with update PM!")
+            });
+    };
+
 
     return (
         <>
@@ -135,6 +171,13 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                                                 </Tag>
                                             </GridCell>
                                             <GridCell type='secondary'>
+                                                <Label>Alert status</Label>
+                                                <Tag
+                                                    color={getAlertTagColorByMember(member)}
+                                                    borderRadius={20}
+                                                >
+                                                    {getAlertStringByMember(member)}
+                                                </Tag>
                                             </GridCell>
                                             <GridCell type='secondary'>
                                                 <Label>Last Check In</Label>
@@ -166,6 +209,49 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                                         </GridRow>
                                     </AccordionTrigger>
                                     <AccordionCollapsible sectionKey={member.id}>
+                                        <GridCell type='primary'>
+                                            <div style={{cursor: 'pointer'}} onClick={() => setShowResults(!showResults)}>
+                                                <Label>PM e-mail</Label>
+                                                <b>{projectManagerEmailForView != '' ? projectManagerEmailForView : member.projectManagerEmail}</b>
+                                            </div>
+
+                                            {!showResults ? null :
+                                                <form
+                                                    onSubmit={(e) => submit(e, member)}
+                                                    style={{marginTop: 20}}
+                                                >
+                                                    <Label>Change Project Manager e-mail</Label>
+                                                    <div style={{width: 450}}>
+                                                        <FormRow split>
+                                                            <Input
+                                                                id="email_changer"
+                                                                type="text"
+                                                                name="email"
+                                                                placeholder="PM E-mail"
+                                                                style={{width: 350}}
+                                                                scale="medium"
+                                                                onChange={projectManagerEmailChange}
+                                                            />
+                                                            <Button
+                                                                type='submit'
+                                                                color='secondary'
+                                                                style={{width: 100}}
+                                                                scale="medium"
+                                                            >
+                                                                Update
+                                                            </Button>
+                                                        </FormRow>
+                                                    </div>
+
+                                                </form>
+                                            }
+                                        </GridCell>
+                                        <GridRow>
+                                            <GridCell type='primary'></GridCell>
+                                            <GridCell type='primary'></GridCell>
+                                            <GridCell type='primary'></GridCell>
+                                            <GridCell type='primary'></GridCell>
+                                        </GridRow>
                                         <GridRow>
                                             <GridCell type='primary'>
                                             </GridCell>
@@ -220,6 +306,20 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                                             <GridCell type='secondary'>
                                                 <Label>Exempt From Check Ins</Label>
                                                 {getDisplayTextFromBool(member.isExemptFromCheckIn)}
+                                            </GridCell>
+                                        </GridRow>
+                                        <GridRow>
+                                            <GridCell type='primary'>
+                                            </GridCell>
+                                            <GridCell type='primary'>
+                                            </GridCell>
+                                            <GridCell type='secondary'>
+                                                <Label>Alert comment</Label>
+                                                <span>{member.alert && member.alert.comment || 'N/A'}</span>
+                                            </GridCell>
+                                            <GridCell type='secondary'>
+                                            </GridCell>
+                                            <GridCell type='secondary'>
                                             </GridCell>
                                         </GridRow>
                                     </AccordionCollapsible>

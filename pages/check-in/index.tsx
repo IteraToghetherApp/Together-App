@@ -7,6 +7,7 @@ import {Banner, Button, FormRow, Input, Select} from '@macpaw/macpaw-ui';
 import {InputValueType} from '@macpaw/macpaw-ui/lib/types';
 import {GetServerSideProps} from 'next';
 import {memberService} from '../../services';
+import {checkInMemberService} from '../../services';
 import {AccountIcon, CheckIcon, ErrorIcon, RefreshingIcon,} from '@macpaw/macpaw-ui/lib/Icons/jsx';
 import GooglePlacesAutocomplete from 'react-google-places-autocomplete';
 import styles from './CheckIn.module.sass';
@@ -504,7 +505,7 @@ export const getServerSideProps: GetServerSideProps = async ({query}) => {
             return {props: {error: 'notAuthed'}};
         }
 
-        const member = await memberService.getById(memberId);
+        const member = await checkInMemberService.getById(memberId);
 
         validateMemberCheckInToken({member, checkInToken});
 

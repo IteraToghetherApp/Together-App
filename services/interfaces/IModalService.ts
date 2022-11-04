@@ -1,17 +1,17 @@
-import { Member } from '../../entities';
-import { Nullable, ObjectLiteral } from '../../types';
+import {Member} from '../../entities';
+import {Nullable, ObjectLiteral} from '../../types';
 
 export type AnyModalServiceMethodParams = UpdateModalParams | OpenModalParams;
 
 export type MemberableModalServiceMethodParams<T extends ObjectLiteral = ObjectLiteral> =
-  AnyModalServiceMethodParams
-  & WithMember
-  & T;
+    AnyModalServiceMethodParams
+    & WithMember
+    & T;
 
 export type NullableMemberableModalServiceMethodParams<T extends ObjectLiteral = ObjectLiteral> =
-  AnyModalServiceMethodParams
-  & WithNullableMember
-  & T;
+    AnyModalServiceMethodParams
+    & WithNullableMember
+    & T;
 
 export type ModalServiceParams<T extends ObjectLiteral> = T & AnyModalServiceMethodParams;
 
@@ -20,41 +20,45 @@ export type WithMember = { member: Member };
 export type WithNullableMember = { member: Nullable<Member> };
 
 export type UpdateModalParams = {
-  triggerId: null;
-  viewId: string;
+    triggerId: null;
+    viewId: string;
 };
 
 export type OpenModalParams = {
-  triggerId: string;
-  viewId: null;
+    triggerId: string;
+    viewId: null;
 };
 
 export type RenderCheckInSelfConfirmationParams = MemberableModalServiceMethodParams<{
-  url: string;
-  isFromRepeatCheckIn: boolean;
+    url: string;
+    isFromRepeatCheckIn: boolean;
 }>;
 
 export type RenderCheckInOtherMemberConfirmationParams = NullableMemberableModalServiceMethodParams<{
-  url: Nullable<string>;
-  requester: Member;
-  hasError: boolean;
+    url: Nullable<string>;
+    requester: Member;
+    hasError: boolean;
 }>;
 
 export type RenderErrorParams = AnyModalServiceMethodParams
-  & { message: string };
+    & { message: string };
 
 export interface IModalService {
-  renderMainMenu(params: MemberableModalServiceMethodParams): Promise<void>;
+    renderCheckInMainMenu(params: MemberableModalServiceMethodParams): Promise<void>;
 
-  renderCheckInSelfConfirmation(params: RenderCheckInSelfConfirmationParams): Promise<void>;
+    renderAlertMainMenu(params: MemberableModalServiceMethodParams): Promise<void>;
 
-  renderCheckInOtherMemberConfirmation(params: RenderCheckInOtherMemberConfirmationParams): Promise<void>;
+    renderCheckInSelfConfirmation(params: RenderCheckInSelfConfirmationParams): Promise<void>;
 
-  renderRepeatCheckInConfirmation(params: MemberableModalServiceMethodParams): Promise<void>;
+    renderAlertSelfConfirmation(params: RenderCheckInSelfConfirmationParams): Promise<void>;
 
-  renderSuccess(params: MemberableModalServiceMethodParams): Promise<void>;
+    renderCheckInOtherMemberConfirmation(params: RenderCheckInOtherMemberConfirmationParams): Promise<void>;
 
-  renderError(params: RenderErrorParams): Promise<void>;
+    renderRepeatCheckInConfirmation(params: MemberableModalServiceMethodParams): Promise<void>;
 
-  renderSuccessConfirm(params: MemberableModalServiceMethodParams): Promise<void>;
+    renderSuccess(params: MemberableModalServiceMethodParams): Promise<void>;
+
+    renderError(params: RenderErrorParams): Promise<void>;
+
+    renderSuccessConfirm(params: MemberableModalServiceMethodParams): Promise<void>;
 }
