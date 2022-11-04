@@ -1,27 +1,27 @@
 import React, {useMemo, useState} from 'react';
 import {
+    Accordion,
+    AccordionCollapsible,
+    AccordionTrigger,
+    Banner,
     Grid,
     GridCell,
     GridRow,
     Label,
     Tag,
     Tooltip,
-    Accordion,
-    AccordionTrigger,
-    AccordionCollapsible,
-    Banner,
 } from '@macpaw/macpaw-ui';
 import {useRouter} from 'next/router';
 import {InfoIcon} from '@macpaw/macpaw-ui/lib/Icons/jsx';
 import {
-    getDisplayTextFromBool,
-    getCountryTagColorByMember,
-    getLastCheckInStringByMember,
-    getLocationStringByMember,
-    getLastCheckInTagColorByMember,
-    findMembersByQuery,
     filterMembersByLastCheckInString,
+    findMembersByQuery,
+    getCountryTagColorByMember,
+    getDisplayTextFromBool,
     getDisplayTextFromCheckInBoolByMember,
+    getLastCheckInStringByMember,
+    getLastCheckInTagColorByMember,
+    getLocationStringByMember,
     getTagColorFromCheckInCriticalBoolByMember,
 } from '../../helpers/client';
 import MemberActions from './MemberActions/MemberActions';
@@ -29,7 +29,7 @@ import styles from './MemberList.module.sass';
 import DownloadCSV from '../DownloadCSV/DownloadCSV';
 import type {MemberDto} from '../../entities';
 import {Nullable} from "../../types";
-import {supportValues} from "../Filters/Filters";
+import {electricityValues, supportValues} from "../Filters/Filters";
 
 interface MemberListProps {
     teamId: string;
@@ -61,6 +61,22 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                 return supportValues[2];
             case "4":
                 return supportValues[3];
+            default:
+                return false;
+        }
+    }
+
+    function displayTextElectricityCondition(electricityCondition: Nullable<string>) {
+        if (electricityCondition == null) {
+            return false;
+        }
+        switch (electricityCondition) {
+            case "1":
+                return electricityValues[0];
+            case "2":
+                return electricityValues[1];
+            case "3":
+                return electricityValues[2];
             default:
                 return false;
         }
@@ -184,6 +200,8 @@ const MemberList: React.FC<MemberListProps> = ({members, total, teamId, replaceM
                                                 {getDisplayTextFromBool(member.isMobilized)}
                                             </GridCell>
                                             <GridCell type='secondary'>
+                                                <Label>Electricity Condition</Label>
+                                                <span>{member.checkIn && displayTextElectricityCondition(member.checkIn.electricityCondition)}</span>
                                             </GridCell>
                                         </GridRow>
                                         <GridRow>
