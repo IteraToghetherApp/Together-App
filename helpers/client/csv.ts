@@ -13,7 +13,6 @@ type ExportableMember = {
     isSafe: Nullable<string>;
     isAbleToWork: Nullable<string>;
     support: Nullable<string>;
-    electricityCondition: Nullable<string>
     isMobilized: string;
     isAdmin: Nullable<string>;
     isExemptFromCheckIn: Nullable<string>;
@@ -22,6 +21,9 @@ type ExportableMember = {
     otherSupport: Nullable<string>
     comment: Nullable<string>;
     lastCheckedIn: Nullable<string>;
+    alert: Nullable<string>;
+    alertComment: Nullable<string>;
+    projectManagerEmail: Nullable<string>;
 }
 
 const columns: Array<keyof ExportableMember> = [
@@ -42,6 +44,9 @@ const columns: Array<keyof ExportableMember> = [
     'otherSupport',
     'comment',
     'lastCheckedIn',
+    'alert',
+    'alertComment',
+    'projectManagerEmail'
 ];
 
 export default async (members: MemberDto[]): Promise<string> => {
@@ -67,6 +72,9 @@ export default async (members: MemberDto[]): Promise<string> => {
         otherSupport: member.checkIn ? member.checkIn.otherSupport : null,
         comment: member.checkIn ? member.checkIn.comment : 'Null',
         lastCheckedIn: member.checkIn ? member.checkIn.createdAt : 'Null',
+        alert: member.alert ? getDisplayTextFromBool(member.alert.isSafe) : 'Null',
+        alertComment: member.alert ? member.alert.comment : 'Null',
+        projectManagerEmail: member.projectManagerEmail
     }));
 
     let csvInput = [];

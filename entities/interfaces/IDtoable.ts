@@ -1,3 +1,3 @@
 export interface IDtoable<T> {
-  toDto(): T;
+    toDto(): T;
 }

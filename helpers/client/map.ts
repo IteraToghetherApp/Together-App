@@ -1,41 +1,41 @@
-import { filterMembersByCountry, filterMembersByState } from './filter';
+import {filterMembersByCountry, filterMembersByState} from './filter';
 
-import type { CheckInDto, MemberDto } from '../../entities';
+import type {CheckInDto, MemberDto} from '../../entities';
 
 const getUniqueNonNullCheckInValuesByMembers = (key: keyof CheckInDto, members: MemberDto[]): string[] => {
-  const withDuplicates = members
-    .filter((member) => Boolean(member.checkIn))
-    .map((member) => member!.checkIn![key]);
+    const withDuplicates = members
+        .filter((member) => Boolean(member.checkIn))
+        .map((member) => member!.checkIn![key]);
 
-  const unique = new Set([...withDuplicates]);
+    const unique = new Set([...withDuplicates]);
 
-  return Array.from(unique)
-    .filter(Boolean)
-    .sort() as string[];
+    return Array.from(unique)
+        .filter(Boolean)
+        .sort() as string[];
 };
 
 export const getCountriesForFilterByMembers = (members: MemberDto[]): string[] => {
-  return getUniqueNonNullCheckInValuesByMembers('country', members);
+    return getUniqueNonNullCheckInValuesByMembers('country', members);
 };
 
 export const getStatesForFilterByMembers = (members: MemberDto[]): string[] => {
-  return getUniqueNonNullCheckInValuesByMembers('state', members);
+    return getUniqueNonNullCheckInValuesByMembers('state', members);
 };
 
 export const getStatesForFiltersByCountry = (country: string, members: MemberDto[]): string[] => {
-  const filteredByCountry = filterMembersByCountry(country, members);
+    const filteredByCountry = filterMembersByCountry(country, members);
 
-  return getStatesForFilterByMembers(filteredByCountry);
+    return getStatesForFilterByMembers(filteredByCountry);
 };
 
 export const getCitiesForFilterByEmployees = (members: MemberDto[]): string[] => {
-  return getUniqueNonNullCheckInValuesByMembers('city', members);
+    return getUniqueNonNullCheckInValuesByMembers('city', members);
 };
 
 export const getCitiesForFiltersByCountryOrState = (country: string, state: string, members: MemberDto[]): string[] => {
-  const filteredByCountry = filterMembersByCountry(country, members);
+    const filteredByCountry = filterMembersByCountry(country, members);
 
-  return getCitiesForFilterByEmployees(state
-    ? filterMembersByState(state, filteredByCountry)
-    : filteredByCountry);
+    return getCitiesForFilterByEmployees(state
+        ? filterMembersByState(state, filteredByCountry)
+        : filteredByCountry);
 };

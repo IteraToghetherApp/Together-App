@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getSession } from 'next-auth/react';
-import { memberService } from '../../services';
+import { checkInMemberService } from '../../services';
 import {
   validateSessionIsValid,
   validateRequesterIsAdmin,
@@ -31,13 +31,13 @@ export default async function SetIsAttribute(req: NextApiRequest, res: NextApiRe
     validateIsAttributesArguments(attribute, value);
 
     const [member, requester] = await Promise.all([
-      memberService.getById(memberId),
-      memberService.getByEmail(email),
+      checkInMemberService.getById(memberId),
+      checkInMemberService.getByEmail(email),
     ]);
 
     validateRequesterIsAdmin(requester);
 
-    const updated = await memberService.setIsAttribute({ member, attribute, value });
+    const updated = await checkInMemberService.setIsAttribute({ member, attribute, value });
 
     res.status(200).json({ ...updated.toDto() });
   } catch (error) {

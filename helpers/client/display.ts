@@ -63,6 +63,18 @@ export const getLastCheckInTagColorByMember = (member: AnyMemberDto): TagColor =
     return 'warning';
 };
 
+export const getAlertTagColorByMember = (member: MemberDto): TagColor => {
+    if (member.alert === null) {
+        return 'custom';
+    }
+
+    if (member.alert?.isSafe) {
+        return 'primary';
+    } else {
+        return 'warning';
+    }
+};
+
 export const getLastCheckInStringByMember = (member: AnyMemberDto): string => {
     if (member.checkIn === null) {
         return 'Never';
@@ -104,6 +116,21 @@ export const getLastCheckInStringByMember = (member: AnyMemberDto): string => {
     }
 
     return format(date, 'MMMM do');
+};
+
+export const getAlertStringByMember = (member: MemberDto): string => {
+    if (member.alert === null) {
+        return 'Never';
+    }
+
+    switch (member.alert?.isSafe) {
+        case true:
+            return 'Yes';
+        case false:
+            return 'No';
+        default:
+            return 'Never';
+    }
 };
 
 export const getDisplayTextFromBool = (bool: Nullable<boolean>): string => {

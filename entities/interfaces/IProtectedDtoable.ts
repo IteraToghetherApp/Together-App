@@ -1,3 +1,3 @@
 export interface IProtectedDtoable<T> {
-  toProtectedDto(): T;
+    toProtectedDto(): T;
 }

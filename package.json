@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": false,
   "engines": {
-    "node": "16.14.0"
+    "node": "16.13.0"
   },
   "scripts": {
     "dev": "next dev",
@@ -18,7 +18,8 @@
     "sync": "node jobs-dist/sync.js",
     "notify": "node jobs-dist/notify.js",
     "remind": "node jobs-dist/remind.js",
-    "request": "node jobs-dist/request.js"
+    "request": "node jobs-dist/request.js",
+    "alert": "node jobs-dist/alert.js"
   },
   "dependencies": {
     "@macpaw/macpaw-ui": "^3.9.6",

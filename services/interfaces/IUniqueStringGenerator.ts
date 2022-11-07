@@ -1,3 +1,3 @@
 export interface IUniqueStringGenerator {
-  generate(): string;
+    generate(): string;
 }
