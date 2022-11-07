@@ -347,7 +347,7 @@ First, open the command line within your Heroku application:
 heroku run bash -a {{heroku-app-name}}
 ```
 
-Then, to update the schema, run the following command inside the application:
+Then, to updatePmEmail the schema, run the following command inside the application:
 
 ```bash
 npm run migrate:production

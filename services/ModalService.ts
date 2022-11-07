@@ -1,24 +1,19 @@
 import type {WebClient} from '@slack/web-api';
 import type {
-    IModalService,
     AnyModalServiceMethodParams,
-    RenderCheckInSelfConfirmationParams,
-    RenderCheckInOtherMemberConfirmationParams,
-    RenderErrorParams,
+    IModalService,
     MemberableModalServiceMethodParams,
+    RenderCheckInOtherMemberConfirmationParams,
+    RenderCheckInSelfConfirmationParams,
+    RenderErrorParams,
 } from './interfaces';
+import {Bits, Blocks, bold, Elements, Modal, setIfFalsy, setIfTruthy, SlackViewDto, user,} from 'slack-block-builder';
 import {
-    Modal,
-    Blocks,
-    Elements,
-    Bits,
-    SlackViewDto,
-    setIfFalsy,
-    user,
-    bold,
-    setIfTruthy,
-} from 'slack-block-builder';
-import {getShortLocationStringByMember, getDisplayTextFromCheckInBoolByMember} from '../helpers/client';
+    getDisplayTextElectricityCondition,
+    getDisplayTextFromCheckInBoolByMember,
+    getDisplayTextSupport,
+    getShortLocationStringByMember
+} from '../helpers/client';
 import {SlackAction} from '../constants';
 
 type OpenOrUpdateViewParams = AnyModalServiceMethodParams & { view: SlackViewDto };
@@ -38,7 +33,7 @@ export class ModalService implements IModalService {
         this.host = params.host;
     }
 
-    public async renderMainMenu(params: MemberableModalServiceMethodParams): Promise<void> {
+    public async renderCheckInMainMenu(params: MemberableModalServiceMethodParams): Promise<void> {
         const {member, ...rest} = params;
         const isOptedOutOfMapOption = Bits.Option({
             text: 'Display Me On Organization Map',
@@ -100,13 +95,56 @@ export class ModalService implements IModalService {
                 Blocks.Actions()
                     .elements(
                         Elements.Checkboxes({
-                            actionId: SlackAction.RenderMainMenu,
+                            actionId: SlackAction.RenderCheckInMainMenu,
                         })
                             .options(isOptedOutOfMapOption)
                             .initialOptions(setIfFalsy(member.isOptedOutOfMap, isOptedOutOfMapOption)),
                     ),
             );
 
+        await this.openOrUpdateView({...rest, view: modal.buildToObject()});
+    }
+
+    public async renderAlertMainMenu(params: MemberableModalServiceMethodParams): Promise<void> {
+        const {member, ...rest} = params;
+
+        const panelForAdmin = () => {
+            if (member.isAdmin) {
+                return [
+                    Blocks.Divider(),
+                    Blocks.Section({text: bold('Visit The Web App')}),
+                    Blocks.Actions()
+                        .elements(
+                            Elements.Button({
+                                text: 'View Check Ins',
+                                actionId: SlackAction.ClickViewCheckIns,
+                                url: `${this.host}/members`,
+                            }),
+                            Elements.Button({
+                                text: 'View Organization Map',
+                                actionId: SlackAction.ClickViewOrganizationMap,
+                                url: `${this.host}/map`,
+                            }),
+                        )
+                ];
+            }
+        }
+
+        const modal = Modal({title: 'Alert'})
+            .blocks(
+                Blocks.Section({text: `Hi, ${user(member.slackId)} :wave::skin-tone-4:`}),
+                Blocks.Section({text: `It's important to stay together and help each other in difficult times. This app is a way to help our organization do just that.`}),
+                Blocks.Divider(),
+                Blocks.Section({text: bold('Check In')}),
+                Blocks.Actions()
+                    .elements(
+                        Elements.Button({
+                            text: 'Check In',
+                            actionId: SlackAction.RenderAlertConfirmation,
+                        }),
+                    ),
+                panelForAdmin(),
+            );
         await this.openOrUpdateView({...rest, view: modal.buildToObject()});
     }
 
@@ -124,7 +162,30 @@ export class ModalService implements IModalService {
                         Elements.Button({
                             url,
                             text: ':link:  Go To Check In',
-                            actionId: SlackAction.RenderMainMenu,
+                            actionId: SlackAction.RenderCheckInMainMenu,
+                        }),
+                    ),
+            )
+            .close('Cancel');
+
+        await this.openOrUpdateView({...rest, view: modal.buildToObject()});
+    }
+
+    public async renderAlertSelfConfirmation(params: RenderCheckInSelfConfirmationParams): Promise<void> {
+        const {url, member, isFromRepeatCheckIn, ...rest} = params;
+
+        const modal = Modal({title: 'Are you OK now?'})
+            .blocks(
+                setIfTruthy(isFromRepeatCheckIn,
+                    Blocks.Section({text: `:warning: Sorry, ${user(member.slackId)}, you haven't previously checked in, so you need to check in manually.`}),
+                ),
+                Blocks.Section({text: `Please let us know how and where you are so to help us provide you with assistance and make important security-related decisions for our organization.`}),
+                Blocks.Section({text: `Upon clicking this button, you will be redirected to a secure website to check in.`})
+                    .accessory(
+                        Elements.Button({
+                            url,
+                            text: ':link:  Go To Check In',
+                            actionId: SlackAction.RenderAlertMainMenu,
                         }),
                     ),
             )
@@ -161,7 +222,7 @@ export class ModalService implements IModalService {
                             Elements.Button({
                                 url: url!,
                                 text: ':link:  Go To Check In',
-                                actionId: SlackAction.RenderMainMenu,
+                                actionId: SlackAction.RenderCheckInMainMenu,
                             }),
                         ),
                 ]),
@@ -180,11 +241,11 @@ export class ModalService implements IModalService {
                 Blocks.Section({text: `Please review your previous check in to before repeating it to make sure all of the data is correct.`}),
                 Blocks.Section({text: `If something has changed, please manually check in.`}),
                 Blocks.Divider(),
-                Blocks.Section({text: `${bold('Location:')} ${getShortLocationStringByMember(memberDto)}`})
-                    .fields(
-                        `${bold('Is Safe:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isSafe')}`,
-                        `${bold('Can Work:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isAbleToWork')}`,
-                    ),
+                Blocks.Section({text: `${bold('Location:')} ${getShortLocationStringByMember(memberDto)}`}),
+                Blocks.Section({text: `${bold('Is Safe:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isSafe')}`}),
+                Blocks.Section({text: `${bold('Can Work:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isAbleToWork')}`}),
+                Blocks.Section({text: `${bold('Company Support:')} ${getDisplayTextSupport(member.checkIn ? member.checkIn.support : 'N/A')}`}),
+                Blocks.Section({text: `${bold('The effect of a power outage:')} ${getDisplayTextElectricityCondition(member.checkIn ? member.checkIn.electricityCondition : 'N/A')}`,}),
                 Blocks.Section({text: `${bold('Comment:')} ${memberDto.checkIn!.comment || 'N/A'}`}),
                 Blocks.Divider(),
                 Blocks.Actions()
@@ -242,7 +303,6 @@ export class ModalService implements IModalService {
 
     private async openOrUpdateView(params: OpenOrUpdateViewParams): Promise<void> {
         const {triggerId, viewId, view} = params;
-
         if (triggerId) {
             await this.httpClient.views.open({
                 view,

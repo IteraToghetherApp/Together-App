@@ -1,5 +1,5 @@
-import type { SlackMember } from '../../entities';
+import type {SlackMember} from '../../entities';
 
 export interface ISlackMemberProvider {
-  getAll(): Promise<SlackMember[]>;
+    getAll(): Promise<SlackMember[]>;
 }

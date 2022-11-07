@@ -1,4 +1,4 @@
-import type {Provider, OAuthProviderType} from 'next-auth/providers';
+import type {OAuthProviderType, Provider} from 'next-auth/providers';
 import type {Member} from '../entities';
 
 export type Maybe<T> = null | undefined | T;
@@ -8,6 +8,8 @@ export type Nullable<T> = T | null;
 export type ObjectLiteral = Record<string, any>;
 
 export type CheckInString = 'short' | 'long' | 'never' | 'other';
+
+export type AlertString = 'yes' | 'no' | 'both' | 'never';
 
 export type BooleanPropString = 'yes' | 'no' | 'both';
 
@@ -41,4 +43,9 @@ export interface AuthProviderConfig {
 export interface CheckInRequestRule {
     requestCheckInOrganizationChannel: boolean;
     requestCheckInDirectMessage: boolean;
+}
+
+export interface AlertRequestRule {
+    requestAlertOrganizationChannel: boolean;
+    requestAlertDirectMessage: boolean;
 }

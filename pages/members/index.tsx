@@ -5,6 +5,7 @@ import {getSession} from 'next-auth/react';
 import Layout from '../../components/Layout/Layout';
 import styles from './Members.module.css';
 import {
+    filterMembersByAlert,
     filterMembersByCanWork,
     filterMembersByCity,
     filterMembersByCountry,
@@ -23,10 +24,12 @@ import {normalizeString, validateSessionIsValid} from '../../helpers/server';
 import MemberList from '../../components/MemberList/MemberList';
 import Search from '../../components/Search/Search';
 import Filters from '../../components/Filters/Filters';
-import {memberService} from '../../services';
+
+import {checkInMemberService} from '../../services';
 import {InvalidSessionError} from '../../exceptions';
 import type {MemberDto} from '../../entities';
 import type {BooleanPropString, CheckInString} from '../../types';
+import {AlertString} from "../../types";
 import {logger, SLACK_WORKSPACE_ID} from '../../config';
 
 interface MembersProps {
@@ -40,10 +43,11 @@ export default function Employees({members, teamId}: MembersProps) {
     const [filterByState, setFilterByState] = useState('');
     const [filterByCity, setFilterByCity] = useState('');
     const [filterIsSafe, setFilterIsSafe] = useState<BooleanPropString>('both');
+    const [filterElectricity, setFilterElectricity] = useState('');
+    const [filterAlert, setFilterAlert] = useState<AlertString>('both');
     const [filterIsMobilized, setFilterIsMobilized] = useState<BooleanPropString>('both');
     const [filterCanWork, setFilterCanWork] = useState<BooleanPropString>('both');
     const [filterSupport, setFilterSupport] = useState('');
-    const [filterElectricity, setFilterElectricity] = useState('');
     const [filterIsExemptFromCheckIn, setFilterIsExemptFromCheckIn] = useState<BooleanPropString>('both');
     const [filterByCheckIn, setFilterByCheckIn] = useState<CheckInString | ''>('');
     const [filteredMembers, setFilteredMembers] = useState<MemberDto[]>(members);
@@ -53,10 +57,11 @@ export default function Employees({members, teamId}: MembersProps) {
         setFilterByState('');
         setFilterByCity('');
         setFilterIsSafe('both');
+        setFilterElectricity('');
+        setFilterAlert('both');
         setFilterIsMobilized('both');
         setFilterCanWork('both');
         setFilterSupport('');
-        setFilterElectricity('');
         setFilterIsExemptFromCheckIn('both');
         setFilterByCheckIn('');
     };
@@ -96,6 +101,10 @@ export default function Employees({members, teamId}: MembersProps) {
             filteredList = filterMembersByIsSafe(filterIsSafe, filteredList);
         }
 
+        if (filterAlert) {
+            filteredList = filterMembersByAlert(filterAlert, filteredList);
+        }
+
         if (filterCanWork) {
             filteredList = filterMembersByCanWork(filterCanWork, filteredList);
         }
@@ -127,6 +136,7 @@ export default function Employees({members, teamId}: MembersProps) {
             filterByState,
             filterByCity,
             filterByCheckIn,
+            filterAlert,
             filterIsSafe,
             filterCanWork,
             filterIsMobilized,
@@ -161,6 +171,10 @@ export default function Employees({members, teamId}: MembersProps) {
         setFilterIsSafe(isSafe);
     };
 
+    const handleAlertFilter = (alert: AlertString) => {
+        setFilterAlert(alert);
+    };
+
     const handleCanWorkFilter = (canWork: BooleanPropString) => {
         setFilterCanWork(canWork);
     };
@@ -181,7 +195,6 @@ export default function Employees({members, teamId}: MembersProps) {
         setFilterIsExemptFromCheckIn(IsExemptFromCheckIn);
     };
 
-
     const memoizedStates = useMemo(() => getStatesForFiltersByCountry(filterByCountry, upToDateMembers), [filterByCountry]);
     const memoizedCities = useMemo(() => getCitiesForFiltersByCountryOrState(filterByCountry, filterByState, upToDateMembers), [filterByCountry, filterByState]);
 
@@ -201,6 +214,8 @@ export default function Employees({members, teamId}: MembersProps) {
                 handleCheckInFilter={handleCheckInFilter}
                 filterIsSafe={filterIsSafe}
                 handleIsSafeFilter={handleIsSafeFilter}
+                filterAlert={filterAlert}
+                handleAlertFilter={handleAlertFilter}
                 filterIsMobilized={filterIsMobilized}
                 handleIsMobilizedFilter={handleIsMobilizedFilter}
                 filterSupport={filterSupport}
@@ -235,9 +250,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
         validateSessionIsValid(session);
 
         const email = normalizeString(session!.user!.email!);
-        const user = await memberService.getByEmail(email);
+
+        const user = await checkInMemberService.getByEmail(email);
         const members = user.isAdmin
-            ? await memberService.getAll()
+            ? await checkInMemberService.getAll()
             : [];
         const dtos = members.map((member) => member.toDto());
 

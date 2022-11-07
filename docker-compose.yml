@@ -13,7 +13,7 @@ services:
       POSTGRES_PASSWORD: admin
 
   node:
-    image: node:16.14.0
+    image: node:16.13.0
     container_name: together
     ports:
       - 3000:3000
