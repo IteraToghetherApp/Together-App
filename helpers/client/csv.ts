@@ -1,6 +1,6 @@
 import {Nullable} from '../../types';
 import * as csv from 'async-csv';
-import {getDisplayTextFromBool} from './display';
+import {getDisplayTextElectricityCondition, getDisplayTextFromBool, getDisplayTextSupport} from './display';
 
 import type {MemberDto} from '../../entities';
 
@@ -35,6 +35,7 @@ const columns: Array<keyof ExportableMember> = [
     'isSafe',
     'isAbleToWork',
     'support',
+    'electricityCondition',
     'isMobilized',
     'isAdmin',
     'isExemptFromCheckIn',
@@ -61,7 +62,8 @@ export default async (members: MemberDto[]): Promise<string> => {
         city: member.checkIn ? member.checkIn.city : 'Null',
         isSafe: member.checkIn ? getDisplayTextFromBool(member.checkIn.isSafe) : 'Null',
         isAbleToWork: member.checkIn ? getDisplayTextFromBool(member.checkIn.isAbleToWork) : 'Null',
-        support: member.checkIn ? member.checkIn.support : 'Null',
+        support: member.checkIn ? getDisplayTextSupport(member.checkIn.support) : 'Null',
+        electricityCondition: member.checkIn ? getDisplayTextElectricityCondition(member.checkIn.electricityCondition) : 'Null',
         isMobilized: getDisplayTextFromBool(member.isMobilized),
         isAdmin: getDisplayTextFromBool(member.isAdmin),
         isExemptFromCheckIn: getDisplayTextFromBool(member.isExemptFromCheckIn),
