@@ -6,8 +6,10 @@ import type {IMessageService} from './interfaces';
 import type {Nullable} from '../types';
 import type {Member} from '../entities';
 import {
+    getDisplayTextElectricityCondition,
     getDisplayTextFromBool,
     getDisplayTextFromCheckInBoolByMember,
+    getDisplayTextSupport,
     getShortLocationStringByMember,
 } from '../helpers/client';
 
@@ -161,9 +163,10 @@ export class MessageService implements IMessageService {
             Blocks.Section({text: `${bold('Member:')} ${memberDto.name} (${user(memberDto.slackId)})`}),
             Blocks.Section({text: `${bold('Location:')} ${getShortLocationStringByMember(memberDto)}`})
                 .fields(
-                    `${bold('Is Mobilized:')} ${getDisplayTextFromBool(memberDto.isMobilized)}`,
                     `${bold('Is Safe:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isSafe')}`,
                     `${bold('Can Work:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isAbleToWork')}`,
+                    `${bold('Support:')} ${getDisplayTextSupport(member.checkIn ? member.checkIn.support : 'N/A')}`,
+                    `${bold('Electricity condition:')} ${getDisplayTextElectricityCondition(member.checkIn ? member.checkIn.electricityCondition : 'N/A')}`,
                 ),
             Blocks.Section({text: `${bold('Comment:')} ${memberDto.checkIn && memberDto.checkIn.comment || 'N/A'}`}),
         ];
@@ -177,7 +180,7 @@ export class MessageService implements IMessageService {
             Blocks.Section({text: `${bold('Location:')} ${getShortLocationStringByMember(memberDto)}`})
                 .fields(
                     `${bold('Are you OK now:')} ${getDisplayTextFromBool(memberDto.alert !== null ? memberDto.alert.isSafe : null)}`,
-                    `${bold('PM e-mail:')} ${memberDto.projectManagerEmail}`
+                    `${bold('PM e-mail:')} ${memberDto.projectManagerEmail !== '' ? memberDto.projectManagerEmail : 'N/A'}`
                 ),
             Blocks.Section({text: `${bold('Comment:')} ${memberDto.alert && memberDto.alert.comment || 'N/A'}`}),
         ];

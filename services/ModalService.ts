@@ -8,7 +8,12 @@ import type {
     RenderErrorParams,
 } from './interfaces';
 import {Bits, Blocks, bold, Elements, Modal, setIfFalsy, setIfTruthy, SlackViewDto, user,} from 'slack-block-builder';
-import {getDisplayTextFromCheckInBoolByMember, getShortLocationStringByMember} from '../helpers/client';
+import {
+    getDisplayTextElectricityCondition,
+    getDisplayTextFromCheckInBoolByMember,
+    getDisplayTextSupport,
+    getShortLocationStringByMember
+} from '../helpers/client';
 import {SlackAction} from '../constants';
 
 type OpenOrUpdateViewParams = AnyModalServiceMethodParams & { view: SlackViewDto };
@@ -236,11 +241,11 @@ export class ModalService implements IModalService {
                 Blocks.Section({text: `Please review your previous check in to before repeating it to make sure all of the data is correct.`}),
                 Blocks.Section({text: `If something has changed, please manually check in.`}),
                 Blocks.Divider(),
-                Blocks.Section({text: `${bold('Location:')} ${getShortLocationStringByMember(memberDto)}`})
-                    .fields(
-                        `${bold('Is Safe:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isSafe')}`,
-                        `${bold('Can Work:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isAbleToWork')}`,
-                    ),
+                Blocks.Section({text: `${bold('Location:')} ${getShortLocationStringByMember(memberDto)}`}),
+                Blocks.Section({text: `${bold('Is Safe:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isSafe')}`}),
+                Blocks.Section({text: `${bold('Can Work:')} ${getDisplayTextFromCheckInBoolByMember(memberDto, 'isAbleToWork')}`}),
+                Blocks.Section({text: `${bold('Company Support:')} ${getDisplayTextSupport(member.checkIn ? member.checkIn.support : 'N/A')}`}),
+                Blocks.Section({text: `${bold('The effect of a power outage:')} ${getDisplayTextElectricityCondition(member.checkIn ? member.checkIn.electricityCondition : 'N/A')}`,}),
                 Blocks.Section({text: `${bold('Comment:')} ${memberDto.checkIn!.comment || 'N/A'}`}),
                 Blocks.Divider(),
                 Blocks.Actions()
